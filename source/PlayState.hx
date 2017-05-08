@@ -5,6 +5,7 @@ import flixel.FlxCamera;
 import flixel.FlxState;
 import flixel.FlxG;
 import flixel.input.keyboard.FlxKey;
+//import flixel.ui.FlxVirtualPad;
 
 import play.GameKeyboardInputs;
 import play.GameState;
@@ -17,8 +18,9 @@ import scenario.Fajardo;
 class PlayState extends FlxState
 {
 	var scenario : Fajardo;
-	
 	var pause_screen : PauseScreen;
+	//var virtual_pad : FlxVirtualPad;
+	var gameState : GameState;
 	
 	var GAME_KEYBOARD_INPUTS : GameKeyboardInputs = {
 		//quit:  [FlxKey.Q],
@@ -31,15 +33,13 @@ class PlayState extends FlxState
 		b:     [FlxKey.TWO, FlxKey.SHIFT],
 	};
 	
-	var gameState : GameState;
-	
 	override public function create():Void
 	{
 		super.create();
 		
 		gameState = {
 			paused: false,
-			state: GameStateE.PROTEST_IDLE,
+			state: GameStateE.CONTROL_AVATAR,
 		};
 		
 		scenario = new Fajardo();
@@ -48,10 +48,16 @@ class PlayState extends FlxState
 		pause_screen = new PauseScreen(gameState.paused);
 		add(pause_screen);
 		
+		//virtual_pad = new FlxVirtualPad(FlxDPadMode.FULL, FlxActionMode.A_B);
+		//virtual_pad.x = 5;
+		//virtual_pad.y = FlxG.height - 160;
+		//add(virtual_pad);
+		
 		camera.minScrollX = 0;
 		camera.maxScrollX = 1000;
 		camera.minScrollY = 0;
 		camera.maxScrollY = 1000;
+		camera.follow(scenario.main_char());
 	}
 
 	override public function update(elapsed:Float):Void
@@ -70,7 +76,7 @@ class PlayState extends FlxState
 			{
 				switch (ga)
 				{
-					case NONE: // noop
+					default: // noop
 					case PAUSE:
 						gameState.paused = !gameState.paused;
 						pause_screen.visible = gameState.paused;
@@ -85,7 +91,6 @@ class PlayState extends FlxState
 							case DOWN: pause_screen.go_down();
 							default: // noop
 						}
-					case MOVE_CAMERA(_): // noop
 				}
 				return true;
 			});
@@ -96,17 +101,18 @@ class PlayState extends FlxState
 			{
 				switch (ga)
 				{
-					case NONE: // noop
+					default: // noop
 					case PAUSE:
 						gameState.paused = !gameState.paused;
 						pause_screen.visible = gameState.paused;
 					case MOVE_CAMERA(direction):
 						moveCameraDirection(FlxG.camera, direction, 20);
+					case MOVE_CHARACTER(direction):
+						scenario.move_char(direction);
 					case GO_TO_GAME_STATE(state):
 						gameState.state = state;
 					case GO_TO_FLIXEL_STATE(state):
 						FlxG.switchState(cast Type.createInstance(state, []));
-					case MOVE_CURSOR(direction): // noop
 				}
 				return true;
 			});
@@ -184,6 +190,8 @@ class PlayState extends FlxState
 				case GameStateE.PROTEST_IDLE:
 					//no player op, just pause or quit
 					return justAppActions();
+				case GameStateE.CONTROL_AVATAR:
+					return justAppActions().concat(moveCharacter());
 				default:
 			}
 		}
@@ -242,4 +250,55 @@ class PlayState extends FlxState
 		
 		return result;
 	}
+	
+	private function moveCharacter() : Array<GameActionE>
+	{
+		var result = [];
+		
+		// move character
+		var up    = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.up);
+		var down  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.down);
+		var left  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.left);
+		var right = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.right);
+		if (up && left)
+		{
+			result.push(GameActionE.MOVE_CHARACTER(DirectionE.UPLEFT));
+		}
+		else if (up && right)
+		{
+			result.push(GameActionE.MOVE_CHARACTER(DirectionE.UPRIGHT));
+		}
+		else if (up && !left && !right)
+		{
+			result.push(GameActionE.MOVE_CHARACTER(DirectionE.UP));
+		}
+		else if (left && !up && !down)
+		{
+			result.push(GameActionE.MOVE_CHARACTER(DirectionE.LEFT));
+		}
+		else if (right && !up && !down)
+		{
+			result.push(GameActionE.MOVE_CHARACTER(DirectionE.RIGHT));
+		}
+		else if (down && left)
+		{
+			result.push(GameActionE.MOVE_CHARACTER(DirectionE.DOWNLEFT));
+		}
+		else if (down && right)
+		{
+			result.push(GameActionE.MOVE_CHARACTER(DirectionE.DOWNRIGHT));
+		}
+		else if (down && !left && !right)
+		{
+			result.push(GameActionE.MOVE_CHARACTER(DirectionE.DOWN));
+		}
+		else
+		{
+			result.push(GameActionE.MOVE_CHARACTER(DirectionE.NONE));
+		}
+		
+		return result;
+	}
+	
+	
 }

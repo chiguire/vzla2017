@@ -8,6 +8,6 @@ enum GameStateE
 {
 	PROTEST_IDLE;
 	ARRIVE_MURCIELAGOS;
-	CONTROL_AVATAR(character:FlxBasic, winning_condition:Void->Bool, losing_condition:Void->Bool, time_secs:Int);
+	CONTROL_AVATAR;//(character:FlxBasic, winning_condition:Void->Bool, losing_condition:Void->Bool, time_secs:Int);
 	ANNOUNCE_NEWS(splash:FlxBasic, time_secs:Int);
 }
