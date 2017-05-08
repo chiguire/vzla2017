@@ -22,13 +22,13 @@ class PlayState extends FlxState
 	
 	var GAME_KEYBOARD_INPUTS : GameKeyboardInputs = {
 		//quit:  [FlxKey.Q],
-		pause: [FlxKey.P],
+		pause: [FlxKey.P, FlxKey.ESCAPE],
 		up:    [FlxKey.UP, FlxKey.W],
 		down:  [FlxKey.DOWN, FlxKey.S],
 		left:  [FlxKey.LEFT, FlxKey.A],
 		right: [FlxKey.RIGHT, FlxKey.D],
-		a:     [FlxKey.ONE],
-		b:     [FlxKey.TWO],
+		a:     [FlxKey.ONE, FlxKey.ENTER],
+		b:     [FlxKey.TWO, FlxKey.SHIFT],
 	};
 	
 	var gameState : GameState;
@@ -45,8 +45,7 @@ class PlayState extends FlxState
 		scenario = new Fajardo();
 		add(scenario);
 		
-		pause_screen = new PauseScreen();
-		pause_screen.visible = gameState.paused;
+		pause_screen = new PauseScreen(gameState.paused);
 		add(pause_screen);
 		
 		camera.minScrollX = 0;
@@ -71,12 +70,22 @@ class PlayState extends FlxState
 			{
 				switch (ga)
 				{
+					case NONE: // noop
 					case PAUSE:
 						gameState.paused = !gameState.paused;
-					case MOVE_CAMERA(direction):
-						moveCameraDirection(FlxG.camera, direction, 20);
-					case GO_TO_STATE(state):
+						pause_screen.visible = gameState.paused;
+					case GO_TO_GAME_STATE(state):
 						gameState.state = state;
+					case GO_TO_FLIXEL_STATE(state):
+						FlxG.switchState(cast Type.createInstance(state, []));
+					case MOVE_CURSOR(direction):
+						switch (direction)
+						{
+							case UP: pause_screen.go_up();
+							case DOWN: pause_screen.go_down();
+							default: // noop
+						}
+					case MOVE_CAMERA(_): // noop
 				}
 				return true;
 			});
@@ -87,13 +96,17 @@ class PlayState extends FlxState
 			{
 				switch (ga)
 				{
+					case NONE: // noop
 					case PAUSE:
 						gameState.paused = !gameState.paused;
 						pause_screen.visible = gameState.paused;
 					case MOVE_CAMERA(direction):
 						moveCameraDirection(FlxG.camera, direction, 20);
-					case GO_TO_STATE(state):
+					case GO_TO_GAME_STATE(state):
 						gameState.state = state;
+					case GO_TO_FLIXEL_STATE(state):
+						FlxG.switchState(cast Type.createInstance(state, []));
+					case MOVE_CURSOR(direction): // noop
 				}
 				return true;
 			});
@@ -144,14 +157,37 @@ class PlayState extends FlxState
 	
 	private function getGameActions() : Array<GameActionE>
 	{
-		switch (gameState.state)
+		if (gameState.paused)
 		{
-			case GameStateE.PROTEST_IDLE:
-				//no player op, just pause or quit
-				return justAppActions();
-			default:
-				return [];
+			if (FlxG.keys.anyJustPressed(GAME_KEYBOARD_INPUTS.up))
+			{
+				return [MOVE_CURSOR(UP)];
+				
+			}
+			else if (FlxG.keys.anyJustPressed(GAME_KEYBOARD_INPUTS.down))
+			{
+				return [MOVE_CURSOR(DOWN)];
+			}
+			else if (FlxG.keys.anyJustPressed(GAME_KEYBOARD_INPUTS.a))
+			{
+				return [pause_screen.get_action()];
+			}
+			else if (FlxG.keys.anyJustPressed(GAME_KEYBOARD_INPUTS.pause))
+			{
+				return [PAUSE];
+			}
 		}
+		else
+		{
+			switch (gameState.state)
+			{
+				case GameStateE.PROTEST_IDLE:
+					//no player op, just pause or quit
+					return justAppActions();
+				default:
+			}
+		}
+		return [];
 #if (web || desktop)
 #end
 	}
@@ -161,7 +197,7 @@ class PlayState extends FlxState
 		var result = [];
 		
 		// pause
-		if (FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.pause))
+		if (FlxG.keys.anyJustPressed(GAME_KEYBOARD_INPUTS.pause))
 		{
 			result.push(GameActionE.PAUSE);
 		}

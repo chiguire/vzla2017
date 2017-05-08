@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <strings>
   <file path="source/play/PauseScreen.hx">
-    <t id="CONTROL: HIDDEN">CONTROL: HIDDEN</t><!--line 70-->
-    <t id="CONTROL: SHOWN">CONTROL: SHOWN</t><!--line 66-->
-    <t id="RESTART GAME">RESTART GAME</t><!--line 37-->
-    <t id="RETURN TO GAME">RETURN TO GAME</t><!--line 34-->
+    <t id="CONTROL: HIDDEN">CONTROL: HIDDEN</t><!--line 137-->
+    <t id="CONTROL: SHOWN">CONTROL: SHOWN</t><!--line 133-->
+    <t id="RESTART GAME">RESTART GAME</t><!--line 43-->
+    <t id="RETURN TO GAME">RETURN TO GAME</t><!--line 42-->
     <t id="RETURN TO MENU">RETURN TO MENU</t><!--line 46-->
-    <t id="SOUND: OFF">SOUND: OFF</t><!--line 58-->
-    <t id="SOUND: ON">SOUND: ON</t><!--line 54-->
+    <t id="SOUND: OFF">SOUND: OFF</t><!--line 125-->
+    <t id="SOUND: ON">SOUND: ON</t><!--line 121-->
   </file>
 </strings>
