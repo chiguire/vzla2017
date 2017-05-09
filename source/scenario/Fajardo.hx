@@ -1,9 +1,12 @@
 package scenario;
 import flixel.FlxG;
+import flixel.FlxZSprite;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
+import flixel.util.FlxSort;
+import play.Character;
 import play.eenum.DirectionE;
 
 /**
@@ -22,9 +25,10 @@ class Fajardo extends FlxSpriteGroup
 	var border_left : FlxSprite;
 	
 	var fg : FlxSpriteGroup;
+	var chars : FlxSpriteGroup;
 	
-	var char1 : FlxSprite;
-	var char2 : FlxSprite;
+	var char1 : Character;
+	var char2 : Character;
 	
 	public function new() 
 	{
@@ -51,18 +55,21 @@ class Fajardo extends FlxSpriteGroup
 		border_right.makeGraphic(10, Std.int(hw.height), FlxColor.TRANSPARENT);
 		border_right.immovable = true;
 		
-		char1 = new FlxSprite(hw.x + 160, FlxG.height / 2, AssetPaths.prs__png);
-		char2 = new FlxSprite(hw.x + 160, FlxG.height / 2 - 50, AssetPaths.gnb__png);
+		char1 = new Character(hw.x + 160, FlxG.height / 2, AssetPaths.prs__png);
+		char2 = new Character(hw.x + 160, FlxG.height / 2 - 50, AssetPaths.gnb__png);
 		
 		
 		fg = new FlxSpriteGroup();
+		chars = new FlxSpriteGroup();
 		
 		fg.add(border_top);
 		fg.add(border_bottom);
 		fg.add(border_left);
 		fg.add(border_right);
-		fg.add(char1);
-		fg.add(char2);
+		fg.add(chars);
+		
+		chars.add(char1);
+		chars.add(char2);
 		
 		add(bg);
 		add(hw);
@@ -74,6 +81,7 @@ class Fajardo extends FlxSpriteGroup
 		super.update(elapsed);
 		
 		FlxG.collide(fg);
+		chars.sort(FlxZSprite.byZ, FlxSort.ASCENDING);
 	}
 	
 	public function move_char(direction:DirectionE)
