@@ -111,6 +111,8 @@ class PlayState extends FlxState
 				}
 				return true;
 			});
+			
+			scenario.active = false;
 		}
 		else
 		{
@@ -134,6 +136,8 @@ class PlayState extends FlxState
 				}
 				return true;
 			});
+			
+			scenario.active = true;
 		}
 	}
 	
@@ -235,50 +239,52 @@ class PlayState extends FlxState
 			switch (gameState.state)
 			{
 				case PROTEST_IDLE:
-					result.push(MOVE_CHARACTER(NONE));
 					result.push(GO_TO_GAME_STATE(CONTROL_AVATAR));
 				case CONTROL_AVATAR:
+					result.push(MOVE_CHARACTER(NONE));
 					result.push(GO_TO_GAME_STATE(PROTEST_IDLE));
 				default: // noop
 			}
 		}
-		
-		// move camera
-		var up    = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.up);
-		var down  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.down);
-		var left  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.left);
-		var right = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.right);
-		if (up && left)
+		else
 		{
-			result.push(GameActionE.MOVE_CAMERA(DirectionE.UPLEFT));
-		}
-		else if (up && right)
-		{
-			result.push(GameActionE.MOVE_CAMERA(DirectionE.UPRIGHT));
-		}
-		else if (up && !left && !right)
-		{
-			result.push(GameActionE.MOVE_CAMERA(DirectionE.UP));
-		}
-		else if (left && !up && !down)
-		{
-			result.push(GameActionE.MOVE_CAMERA(DirectionE.LEFT));
-		}
-		else if (right && !up && !down)
-		{
-			result.push(GameActionE.MOVE_CAMERA(DirectionE.RIGHT));
-		}
-		else if (down && left)
-		{
-			result.push(GameActionE.MOVE_CAMERA(DirectionE.DOWNLEFT));
-		}
-		else if (down && right)
-		{
-			result.push(GameActionE.MOVE_CAMERA(DirectionE.DOWNRIGHT));
-		}
-		else if (down && !left && !right)
-		{
-			result.push(GameActionE.MOVE_CAMERA(DirectionE.DOWN));
+			// move camera
+			var up    = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.up);
+			var down  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.down);
+			var left  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.left);
+			var right = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.right);
+			if (up && left)
+			{
+				result.push(GameActionE.MOVE_CAMERA(DirectionE.UPLEFT));
+			}
+			else if (up && right)
+			{
+				result.push(GameActionE.MOVE_CAMERA(DirectionE.UPRIGHT));
+			}
+			else if (up && !left && !right)
+			{
+				result.push(GameActionE.MOVE_CAMERA(DirectionE.UP));
+			}
+			else if (left && !up && !down)
+			{
+				result.push(GameActionE.MOVE_CAMERA(DirectionE.LEFT));
+			}
+			else if (right && !up && !down)
+			{
+				result.push(GameActionE.MOVE_CAMERA(DirectionE.RIGHT));
+			}
+			else if (down && left)
+			{
+				result.push(GameActionE.MOVE_CAMERA(DirectionE.DOWNLEFT));
+			}
+			else if (down && right)
+			{
+				result.push(GameActionE.MOVE_CAMERA(DirectionE.DOWNRIGHT));
+			}
+			else if (down && !left && !right)
+			{
+				result.push(GameActionE.MOVE_CAMERA(DirectionE.DOWN));
+			}
 		}
 		
 		return result;
@@ -344,5 +350,16 @@ class PlayState extends FlxState
 			default:
 				// noop
 		}
+	}
+	
+	override public function onFocus():Void 
+	{
+		super.onFocus();
+	}
+	
+	override public function onFocusLost() : Void
+	{
+		super.onFocusLost();
+		messageQueue.push(PAUSE);
 	}
 }
