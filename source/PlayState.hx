@@ -5,6 +5,7 @@ import flixel.FlxCamera;
 import flixel.FlxState;
 import flixel.FlxG;
 import flixel.input.keyboard.FlxKey;
+import flixel.text.FlxText;
 //import flixel.ui.FlxVirtualPad;
 
 import play.GameKeyboardInputs;
@@ -22,6 +23,10 @@ class PlayState extends FlxState
 	//var virtual_pad : FlxVirtualPad;
 	var gameState : GameState;
 	
+	var stateDebugText : FlxText;
+	
+	var messageQueue : Array<GameActionE>;
+	
 	var GAME_KEYBOARD_INPUTS : GameKeyboardInputs = {
 		//quit:  [FlxKey.Q],
 		pause: [FlxKey.P, FlxKey.ESCAPE],
@@ -37,6 +42,7 @@ class PlayState extends FlxState
 	{
 		super.create();
 		
+		messageQueue = [];
 		gameState = {
 			paused: false,
 			state: GameStateE.CONTROL_AVATAR,
@@ -53,17 +59,27 @@ class PlayState extends FlxState
 		//virtual_pad.y = FlxG.height - 160;
 		//add(virtual_pad);
 		
+		stateDebugText = new FlxText(5, FlxG.height - 15, FlxG.width - 10, "State:");
+		stateDebugText.scrollFactor.set();
+		add(stateDebugText);
+		
 		camera.minScrollX = 0;
 		camera.maxScrollX = 1000;
 		camera.minScrollY = 0;
 		camera.maxScrollY = 1000;
-		camera.follow(scenario.main_char());
+		FlxG.worldBounds.set(-100, -100, 1200, 1200);
+		
+		dealTransition(null, gameState.state);
 	}
 
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
 		var gameActions = getGameActions();
+		while (messageQueue.length > 0)
+		{
+			gameActions.push(messageQueue.pop());
+		}
 		updateGameState(gameActions);
 		updateRender(gameActions);
 	}
@@ -81,6 +97,7 @@ class PlayState extends FlxState
 						gameState.paused = !gameState.paused;
 						pause_screen.visible = gameState.paused;
 					case GO_TO_GAME_STATE(state):
+						dealTransition(gameState.state, state);
 						gameState.state = state;
 					case GO_TO_FLIXEL_STATE(state):
 						FlxG.switchState(cast Type.createInstance(state, []));
@@ -110,6 +127,7 @@ class PlayState extends FlxState
 					case MOVE_CHARACTER(direction):
 						scenario.move_char(direction);
 					case GO_TO_GAME_STATE(state):
+						dealTransition(gameState.state, state);
 						gameState.state = state;
 					case GO_TO_FLIXEL_STATE(state):
 						FlxG.switchState(cast Type.createInstance(state, []));
@@ -159,6 +177,7 @@ class PlayState extends FlxState
 	
 	private function updateRender(gameActions:Array<GameActionE>)
 	{
+		stateDebugText.text = "State: " + Std.string(gameState.state);
 	}
 	
 	private function getGameActions() : Array<GameActionE>
@@ -191,7 +210,7 @@ class PlayState extends FlxState
 					//no player op, just pause or quit
 					return justAppActions();
 				case GameStateE.CONTROL_AVATAR:
-					return justAppActions().concat(moveCharacter());
+					return moveCharacter().concat(justAppActions());
 				default:
 			}
 		}
@@ -208,6 +227,20 @@ class PlayState extends FlxState
 		if (FlxG.keys.anyJustPressed(GAME_KEYBOARD_INPUTS.pause))
 		{
 			result.push(GameActionE.PAUSE);
+		}
+		
+		// DEBUG: change mode
+		if (FlxG.keys.anyJustPressed([FlxKey.SPACE]))
+		{
+			switch (gameState.state)
+			{
+				case PROTEST_IDLE:
+					result.push(MOVE_CHARACTER(NONE));
+					result.push(GO_TO_GAME_STATE(CONTROL_AVATAR));
+				case CONTROL_AVATAR:
+					result.push(GO_TO_GAME_STATE(PROTEST_IDLE));
+				default: // noop
+			}
 		}
 		
 		// move camera
@@ -300,5 +333,16 @@ class PlayState extends FlxState
 		return result;
 	}
 	
-	
+	private function dealTransition(oldState:Null<GameStateE>, newState:GameStateE)
+	{
+		switch (newState)
+		{
+			case CONTROL_AVATAR:
+				camera.follow(scenario.main_char());
+			case PROTEST_IDLE:
+				camera.follow(null);
+			default:
+				// noop
+		}
+	}
 }

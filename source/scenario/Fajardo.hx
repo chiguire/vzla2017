@@ -35,24 +35,24 @@ class Fajardo extends FlxSpriteGroup
 		
 		hw = new FlxSprite(248, 0, AssetPaths.top_hw__png);
 		
-		border_top = new FlxSprite(238, -10);
-		border_top.makeGraphic(360, 10, FlxColor.TRANSPARENT);
+		border_top = new FlxSprite(hw.x - 10, -10);
+		border_top.makeGraphic(Std.int(hw.width) + 20, 10, FlxColor.TRANSPARENT);
 		border_top.immovable = true;
 		
-		border_bottom = new FlxSprite(238, FlxG.height);
-		border_bottom.makeGraphic(360, 10, FlxColor.TRANSPARENT);
+		border_bottom = new FlxSprite(hw.x - 10, hw.height);
+		border_bottom.makeGraphic(Std.int(hw.width) + 20, 10, FlxColor.TRANSPARENT);
 		border_bottom.immovable = true;
 		
-		border_left = new FlxSprite(238, 0);
-		border_left.makeGraphic(10, FlxG.height, FlxColor.TRANSPARENT);
+		border_left = new FlxSprite(hw.x - 10, 0);
+		border_left.makeGraphic(10, Std.int(hw.height), FlxColor.TRANSPARENT);
 		border_left.immovable = true;
 		
-		border_right = new FlxSprite(248 + 340, 0);
-		border_right.makeGraphic(10, FlxG.height, FlxColor.TRANSPARENT);
+		border_right = new FlxSprite(hw.x + hw.width, 0);
+		border_right.makeGraphic(10, Std.int(hw.height), FlxColor.TRANSPARENT);
 		border_right.immovable = true;
 		
-		char1 = new FlxSprite(238 + 160, FlxG.height / 2, AssetPaths.prs__png);
-		char2 = new FlxSprite(238 + 160, FlxG.height / 2 - 50, AssetPaths.gnb__png);
+		char1 = new FlxSprite(hw.x + 160, FlxG.height / 2, AssetPaths.prs__png);
+		char2 = new FlxSprite(hw.x + 160, FlxG.height / 2 - 50, AssetPaths.gnb__png);
 		
 		
 		fg = new FlxSpriteGroup();
