@@ -43,11 +43,11 @@ class Fajardo extends FlxSpriteGroup
 		border_bottom.makeGraphic(Std.int(hw.width) + 20, 10, FlxColor.TRANSPARENT);
 		border_bottom.immovable = true;
 		
-		border_left = new FlxSprite(hw.x - 10, 0);
+		border_left = new FlxSprite(hw.x, 0);
 		border_left.makeGraphic(10, Std.int(hw.height), FlxColor.TRANSPARENT);
 		border_left.immovable = true;
 		
-		border_right = new FlxSprite(hw.x + hw.width, 0);
+		border_right = new FlxSprite(hw.x + hw.width - 10, 0);
 		border_right.makeGraphic(10, Std.int(hw.height), FlxColor.TRANSPARENT);
 		border_right.immovable = true;
 		
