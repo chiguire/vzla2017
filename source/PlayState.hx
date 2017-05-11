@@ -153,7 +153,7 @@ class PlayState extends FlxState
 			case MOVE_CAMERA_TO_POSITION(position, tweened):
 				if (tweened)
 				{
-					FlxTween.tween(FlxG.camera, {x:position.x, y:position.y}, 1);
+					FlxTween.tween(FlxG.camera.scroll, {x:position.x, y:position.y}, 1);
 				}
 				else
 				{
