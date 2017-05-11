@@ -8,6 +8,7 @@ import flixel.math.FlxRect;
 import flixel.util.FlxColor;
 import flixel.util.FlxSort;
 import play.Character;
+import play.Tanqueta;
 import play.eenum.DirectionE;
 
 /**
@@ -18,6 +19,8 @@ class Fajardo extends FlxSpriteGroup
 {
 
 	var bg : FlxSprite;
+	var guaire : FlxSprite;
+	var guaire2 : FlxSprite;
 	var hw : FlxSprite;
 	
 	var border_top : FlxSprite;
@@ -30,6 +33,8 @@ class Fajardo extends FlxSpriteGroup
 	
 	var char1 : Character;
 	var char2 : Character;
+	var tanqueta : Tanqueta;
+	var vehiculo2 : FlxZSprite;
 	
 	public function new() 
 	{
@@ -37,6 +42,11 @@ class Fajardo extends FlxSpriteGroup
 		
 		bg = new FlxSprite(0, 0, AssetPaths.bottom_hw__png);
 		bg.scrollFactor.set(0.8, 0.8);
+		
+		guaire = new FlxSprite(59, 0, AssetPaths.river__png);
+		guaire2 = new FlxSprite(59, -guaire.height, AssetPaths.river__png);
+		guaire.velocity.y = 80;
+		guaire2.velocity.y = 80;
 		
 		hw = new FlxSprite(248, 0, AssetPaths.top_hw__png);
 		
@@ -58,7 +68,7 @@ class Fajardo extends FlxSpriteGroup
 		
 		char1 = new Character(hw.x + 160, FlxG.height / 2, AssetPaths.prs__png);
 		char2 = new Character(hw.x + 160, FlxG.height / 2 - 50, AssetPaths.gnb__png);
-		
+		tanqueta = new Tanqueta(hw.x + 120, 40);
 		
 		fg = new FlxSpriteGroup();
 		entities = new FlxSpriteGroup();
@@ -71,8 +81,11 @@ class Fajardo extends FlxSpriteGroup
 		
 		entities.add(char1);
 		entities.add(char2);
+		entities.add(tanqueta);
 		
 		add(bg);
+		add(guaire);
+		add(guaire2);
 		add(hw);
 		add(fg);
 	}
@@ -84,6 +97,12 @@ class Fajardo extends FlxSpriteGroup
 	override public function update(elapsed:Float):Void 
 	{
 		super.update(elapsed);
+		
+		if (guaire.y >= 1000)
+		{
+			guaire.y -= 1000;
+			guaire2.y -= 1000;
+		}
 		
 		FlxG.collide(fg);
 		entities.sort(FlxZSprite.byZ, FlxSort.ASCENDING);
