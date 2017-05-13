@@ -71,6 +71,7 @@ class PlayState extends FlxState
 		camera.maxScrollX = scenarioBounds.right;
 		camera.minScrollY = scenarioBounds.top;
 		camera.maxScrollY = scenarioBounds.bottom;
+		FlxG.log.error("right: "+ scenarioBounds.right + ". bottom: "+scenarioBounds.bottom);
 		FlxG.worldBounds.set(
 			scenarioBounds.left   - 100, 
 			scenarioBounds.top    - 100, 

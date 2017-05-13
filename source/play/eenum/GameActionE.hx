@@ -17,6 +17,7 @@ enum GameActionE
 	DELAY(time:Float);
 	MOVE_CHARACTER(direction:DirectionE);
 	DO_CHARACTER_ACTION(action_num:Int);
+	//EXECUTE_TV_NEWS_SECTION(portrait:FlxSprite, name:String, 
 	//QUIT;
 	PAUSE;
 	GO_TO_GAME_STATE(state:GameStateE);

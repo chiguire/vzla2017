@@ -7,6 +7,7 @@ import flixel.FlxSprite;
 import flixel.math.FlxRect;
 import flixel.util.FlxColor;
 import flixel.util.FlxSort;
+import play.Barrera;
 import play.Character;
 import play.Tanqueta;
 import play.eenum.DirectionE;
@@ -45,8 +46,8 @@ class Fajardo extends FlxSpriteGroup
 		
 		guaire = new FlxSprite(59, 0, AssetPaths.river__png);
 		guaire2 = new FlxSprite(59, -guaire.height, AssetPaths.river__png);
-		guaire.velocity.y = 80;
-		guaire2.velocity.y = 80;
+		guaire.velocity.y = 100;
+		guaire2.velocity.y = 100;
 		
 		hw = new FlxSprite(248, 0, AssetPaths.top_hw__png);
 		
@@ -54,7 +55,7 @@ class Fajardo extends FlxSpriteGroup
 		border_top.makeGraphic(Std.int(hw.width) + 20, 10, FlxColor.TRANSPARENT);
 		border_top.immovable = true;
 		
-		border_bottom = new FlxSprite(hw.x - 10, hw.height);
+		border_bottom = new FlxSprite(hw.x - 10, hw.height - 40);
 		border_bottom.makeGraphic(Std.int(hw.width) + 20, 10, FlxColor.TRANSPARENT);
 		border_bottom.immovable = true;
 		
@@ -67,8 +68,9 @@ class Fajardo extends FlxSpriteGroup
 		border_right.immovable = true;
 		
 		char1 = new Character(hw.x + 160, FlxG.height / 2, AssetPaths.prs__png);
-		char2 = new Character(hw.x + 160, FlxG.height / 2 - 50, AssetPaths.gnb__png);
+		char2 = new Character(hw.x + 140, FlxG.height / 2 - 30, AssetPaths.gnb__png);
 		tanqueta = new Tanqueta(hw.x + 120, 40);
+		vehiculo2 = new Barrera(hw.x + 170, 60);
 		
 		fg = new FlxSpriteGroup();
 		entities = new FlxSpriteGroup();
@@ -82,6 +84,7 @@ class Fajardo extends FlxSpriteGroup
 		entities.add(char1);
 		entities.add(char2);
 		entities.add(tanqueta);
+		entities.add(vehiculo2);
 		
 		add(bg);
 		add(guaire);
@@ -92,16 +95,16 @@ class Fajardo extends FlxSpriteGroup
 	
 	public function worldBounds() : FlxRect
 	{
-		return new FlxRect(0, 0, 1000, 1000);
+		return new FlxRect(0, 0, 1024, 1024);
 	}
 	override public function update(elapsed:Float):Void 
 	{
 		super.update(elapsed);
 		
-		if (guaire.y >= 1000)
+		if (guaire.y >= 1024)
 		{
-			guaire.y -= 1000;
-			guaire2.y -= 1000;
+			guaire.y -= 1024;
+			guaire2.y -= 1024;
 		}
 		
 		FlxG.collide(fg);
