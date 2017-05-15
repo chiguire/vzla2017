@@ -4,6 +4,7 @@ import flixel.FlxZSprite;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.FlxSprite;
+import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.util.FlxColor;
 import flixel.util.FlxSort;
@@ -11,12 +12,14 @@ import play.Barrera;
 import play.Character;
 import play.Tanqueta;
 import play.enums.DirectionE;
+import play.enums.GameStateE;
+import play.enums.GameActionE;
 
 /**
  * ...
  * @author 
  */
-class Fajardo extends FlxSpriteGroup
+class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 {
 
 	var bg : FlxSprite;
@@ -36,6 +39,9 @@ class Fajardo extends FlxSpriteGroup
 	var char2 : Character;
 	var tanqueta : Tanqueta;
 	var vehiculo2 : FlxZSprite;
+	
+	var goal : FlxZSprite;
+	var lose : FlxZSprite;
 	
 	public function new() 
 	{
@@ -72,6 +78,15 @@ class Fajardo extends FlxSpriteGroup
 		tanqueta = new Tanqueta(hw.x + 120, 40);
 		vehiculo2 = new Barrera(hw.x + 170, 60);
 		
+		goal = new FlxZSprite(hw.x + 160, FlxG.height / 2 + 300, 35);
+		goal.makeGraphic(35, 35, FlxColor.RED);
+		goal.immovable = true;
+		
+		lose= new FlxZSprite(hw.x + 200, FlxG.height / 2 + 300, 35);
+		lose.makeGraphic(35, 35, FlxColor.YELLOW);
+		lose.immovable = true;
+		
+		
 		fg = new FlxSpriteGroup();
 		entities = new FlxSpriteGroup();
 		
@@ -85,6 +100,8 @@ class Fajardo extends FlxSpriteGroup
 		entities.add(char2);
 		entities.add(tanqueta);
 		entities.add(vehiculo2);
+		entities.add(goal);
+		entities.add(lose);
 		
 		add(bg);
 		add(guaire);
@@ -97,6 +114,7 @@ class Fajardo extends FlxSpriteGroup
 	{
 		return new FlxRect(0, 0, 1024, 1024);
 	}
+	
 	override public function update(elapsed:Float):Void 
 	{
 		super.update(elapsed);
@@ -142,8 +160,20 @@ class Fajardo extends FlxSpriteGroup
 		FlxG.log.notice("Action!: " + action);
 	}
 	
-	public function main_char() : FlxSprite
+	public function starting_camera_position() : FlxPoint
 	{
-		return char1;
+		return FlxPoint.get(100, 100);
+	}
+	
+	public function starting_state() : GameStateE
+	{
+		return GameStateE.PROTEST_IDLE;
+	}
+	
+	public function timeline() : Iterator<GameActionE>
+	{
+		return [
+			
+		].iterator();
 	}
 }

@@ -11,14 +11,18 @@ enum GameActionE
 {
 	NONE;
 	MOVE_CURSOR(direction:DirectionE);
+	
 	MOVE_CAMERA(direction:DirectionE);
 	MOVE_CAMERA_TO_POSITION(position:FlxPoint, tweened:Bool);
 	FOLLOW_CAMERA(?entity:FlxSprite);
-	DELAY(time:Float);
-	MOVE_CHARACTER(direction:DirectionE);
+	DELAY_AFTER_ACTION(time:Float,action:GameActionE);
+	SEQUENCE(seq:Array<GameActionE>);
+	SPAWN(seq:Array<GameActionE>);
+	
+	MOVE_CHARACTER_DIRECTION(direction:DirectionE);
+	MOVE_CHARACTER_TO_POS(pos:FlxPoint);
 	DO_CHARACTER_ACTION(action_num:Int);
-	//EXECUTE_TV_NEWS_SECTION(portrait:FlxSprite, name:String, dialogue:String);  // TODO Implement as a goto state
-	//QUIT;
+	
 	PAUSE;
 	GO_TO_GAME_STATE(state:GameStateE);
 	GO_TO_FLIXEL_STATE(state:Class<FlxState>);

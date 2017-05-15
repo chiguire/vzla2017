@@ -1,13 +1,13 @@
 package play.enums;
-import flixel.FlxBasic;
+import scenario.ScenarioCondition;
+import flixel.FlxSprite;
 
 /**
- * @author 
  */
 enum GameStateE 
 {
 	PROTEST_IDLE;
 	ARRIVE_MURCIELAGOS;
-	CONTROL_AVATAR;//(character:FlxBasic, winning_condition:Void->Bool, losing_condition:Void->Bool, time_secs:Int);
-	ANNOUNCE_NEWS;
+	CONTROL_AVATAR(character:FlxSprite, winning_condition:ScenarioCondition, losing_condition:ScenarioCondition);
+	ANNOUNCE_NEWS(portrait:FlxSprite, name:String, dialogue:String);
 }

@@ -8,6 +8,8 @@ import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxPoint;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxTimer;
+import haxe.ds.GenericStack;
 //import flixel.ui.FlxVirtualPad;
 
 import play.GameKeyboardInputs;
@@ -29,10 +31,11 @@ class PlayState extends FlxState
 	
 	var stateDebugText : FlxText;
 	
-	var messageQueue : Array<GameActionE>;
+	var inputQueue : Array<GameActionE>;
+	var messageStack : GenericStack<Iterator<GameActionE>>;
+	var activeTimers : Array<FlxTimer>;
 	
 	var GAME_KEYBOARD_INPUTS : GameKeyboardInputs = {
-		//quit:  [FlxKey.Q],
 		pause: [FlxKey.P, FlxKey.ESCAPE],
 		up:    [FlxKey.UP, FlxKey.W],
 		down:  [FlxKey.DOWN, FlxKey.S],
@@ -46,16 +49,12 @@ class PlayState extends FlxState
 	{
 		super.create();
 		
-		messageQueue = [];
-		gameState = {
-			paused: false,
-			state: GameStateE.CONTROL_AVATAR,
-		};
+		var startPaused = false;
 		
 		scenario = new Fajardo();
 		add(scenario);
 		
-		pause_screen = new PauseScreen(gameState.paused);
+		pause_screen = new PauseScreen(startPaused);
 		add(pause_screen);
 		
 		//virtual_pad = new FlxVirtualPad(FlxDPadMode.FULL, FlxActionMode.A_B);
@@ -73,7 +72,7 @@ class PlayState extends FlxState
 		camera.maxScrollX = scenarioBounds.right;
 		camera.minScrollY = scenarioBounds.top;
 		camera.maxScrollY = scenarioBounds.bottom;
-		FlxG.log.error("right: "+ scenarioBounds.right + ". bottom: "+scenarioBounds.bottom);
+		//FlxG.log.error("right: "+ scenarioBounds.right + ". bottom: "+scenarioBounds.bottom);
 		FlxG.worldBounds.set(
 			scenarioBounds.left   - 100, 
 			scenarioBounds.top    - 100, 
@@ -81,19 +80,45 @@ class PlayState extends FlxState
 			scenarioBounds.bottom + 100
 		);
 		
+		inputQueue = [];
+		activeTimers = [];
+		messageStack = new GenericStack();
+		messageStack.add(scenario.timeline());
+		gameState = {
+			paused: startPaused,
+			state: scenario.starting_state()
+		};
+		
 		dealTransition(null, gameState.state);
 	}
 
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
-		var gameActions = getGameActions();
-		while (messageQueue.length > 0)
+		updateTimers();
+		var inputActions = getGameActions();
+		while (inputQueue.length > 0)
 		{
-			gameActions.push(messageQueue.pop());
+			inputActions.push(inputQueue.pop());
 		}
-		updateGameState(gameActions);
-		updateRender(gameActions);
+		updateGameState(inputActions);
+		updateRender();
+	}
+	
+	private function updateTimers()
+	{
+		var timersToRemove = [];
+		for (timer in activeTimers)
+		{
+			if (timer.finished)
+			{
+				timersToRemove.push(timer);
+			}
+		}
+		for (timer in timersToRemove)
+		{
+			timersToRemove.remove(timer);
+		}
 	}
 	
 	private function updateGameState(gameActions:Array<GameActionE>) : Void
@@ -105,8 +130,6 @@ class PlayState extends FlxState
 				pauseScreenProcessAction(ga);
 				return true;
 			});
-			
-			scenario.active = false;
 		}
 		else
 		{
@@ -116,7 +139,50 @@ class PlayState extends FlxState
 				return true;
 			});
 			
-			scenario.active = true;
+			executeMessageStack();
+		}
+	}
+	
+	private function executeMessageStack()
+	{
+		while (canStepMessageStack())
+		{
+			var messageSequence = messageStack.first();
+			if (messageSequence.hasNext())
+			{
+				executeMessageStackNextAction(messageSequence.next());
+			}
+			else
+			{
+				messageStack.pop();
+			}
+		}
+	}
+	
+	private function canStepMessageStack()
+	{
+		return activeTimers.length == 0 &&
+			!messageStack.isEmpty();
+	}
+	
+	private function executeMessageStackNextAction(action:Null<GameActionE>)
+	{
+		switch (action)
+		{
+			case DELAY_AFTER_ACTION(time, action):
+				var timer = new FlxTimer();
+				timer.start(time);
+				activeTimers.push(timer);
+				gameScreenProcessAction(action);
+			case SEQUENCE(seq):
+				messageStack.add(seq.iterator()); // Will be executed in next update
+			case SPAWN(seq):
+				for (a in seq)
+				{
+					executeMessageStackNextAction(a);
+				}
+			default:
+				gameScreenProcessAction(action);
 		}
 	}
 	
@@ -126,8 +192,7 @@ class PlayState extends FlxState
 		{
 			default: // noop
 			case PAUSE:
-				gameState.paused = !gameState.paused;
-				pause_screen.visible = gameState.paused;
+				pauseToggle();
 			case GO_TO_GAME_STATE(state):
 				dealTransition(gameState.state, state);
 				gameState.state = state;
@@ -148,9 +213,7 @@ class PlayState extends FlxState
 		switch (gameAction)
 		{
 			case PAUSE:
-				gameState.paused = !gameState.paused;
-				pause_screen.visible = gameState.paused;
-				
+				pauseToggle();
 			case MOVE_CAMERA(direction):
 				moveCameraDirection(FlxG.camera, direction, 20);
 			case MOVE_CAMERA_TO_POSITION(position, tweened):
@@ -164,7 +227,7 @@ class PlayState extends FlxState
 				}
 			case FOLLOW_CAMERA(entity):
 				camera.follow(entity);
-			case MOVE_CHARACTER(direction):
+			case MOVE_CHARACTER_DIRECTION(direction):
 				scenario.move_char(direction);
 			case DO_CHARACTER_ACTION(action):
 				scenario.do_char_action(action);
@@ -174,10 +237,12 @@ class PlayState extends FlxState
 				gameState.state = state;
 			case GO_TO_FLIXEL_STATE(state):
 				FlxG.switchState(cast Type.createInstance(state, []));
-			case DELAY(duration):
-				FlxG.log.notice("Delaying for " + duration + "ms");
 				
 			// noop
+			case SEQUENCE(_):
+			case SPAWN(_):
+			case MOVE_CHARACTER_TO_POS(_):
+			case DELAY_AFTER_ACTION(_,_):
 			case MOVE_CURSOR(_):
 			case NONE:
 		}
@@ -221,7 +286,7 @@ class PlayState extends FlxState
 		camera.scroll.y += y;
 	}
 	
-	private function updateRender(gameActions:Array<GameActionE>)
+	private function updateRender()
 	{
 		stateDebugText.text = "State: " + Std.string(gameState.state);
 	}
@@ -255,9 +320,10 @@ class PlayState extends FlxState
 				case GameStateE.PROTEST_IDLE:
 					//no player op, just pause or quit
 					return justAppActions();
-				case GameStateE.CONTROL_AVATAR:
+				case GameStateE.CONTROL_AVATAR(_,_,_):
 					return moveCharacter().concat(justAppActions());
-				default:
+				case ARRIVE_MURCIELAGOS:
+				case ANNOUNCE_NEWS(_,_,_):
 			}
 		}
 		return [];
@@ -278,13 +344,14 @@ class PlayState extends FlxState
 		{
 			switch (gameState.state)
 			{
+				case ARRIVE_MURCIELAGOS: // TODO	
 				case PROTEST_IDLE:
-					result.push(GO_TO_GAME_STATE(CONTROL_AVATAR));
-				case CONTROL_AVATAR:
-					result.push(MOVE_CHARACTER(NONE));
+					result.push(GO_TO_GAME_STATE(CONTROL_AVATAR(null, null, null)));
+				case CONTROL_AVATAR(character, winning_condition, losing_condition):
+					result.push(MOVE_CHARACTER_DIRECTION(NONE));
 					result.push(GO_TO_GAME_STATE(PROTEST_IDLE));
 					result.push(MOVE_CAMERA_TO_POSITION(FlxPoint.get(500, 500), true));
-				default: // noop
+				case ANNOUNCE_NEWS(portrait, name, dialogue): // TODO
 			}
 		}
 		else
@@ -342,39 +409,39 @@ class PlayState extends FlxState
 		var right = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.right);
 		if (up && left)
 		{
-			result.push(GameActionE.MOVE_CHARACTER(DirectionE.UPLEFT));
+			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.UPLEFT));
 		}
 		else if (up && right)
 		{
-			result.push(GameActionE.MOVE_CHARACTER(DirectionE.UPRIGHT));
+			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.UPRIGHT));
 		}
 		else if (up && !left && !right)
 		{
-			result.push(GameActionE.MOVE_CHARACTER(DirectionE.UP));
+			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.UP));
 		}
 		else if (left && !up && !down)
 		{
-			result.push(GameActionE.MOVE_CHARACTER(DirectionE.LEFT));
+			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.LEFT));
 		}
 		else if (right && !up && !down)
 		{
-			result.push(GameActionE.MOVE_CHARACTER(DirectionE.RIGHT));
+			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.RIGHT));
 		}
 		else if (down && left)
 		{
-			result.push(GameActionE.MOVE_CHARACTER(DirectionE.DOWNLEFT));
+			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.DOWNLEFT));
 		}
 		else if (down && right)
 		{
-			result.push(GameActionE.MOVE_CHARACTER(DirectionE.DOWNRIGHT));
+			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.DOWNRIGHT));
 		}
 		else if (down && !left && !right)
 		{
-			result.push(GameActionE.MOVE_CHARACTER(DirectionE.DOWN));
+			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.DOWN));
 		}
 		else
 		{
-			result.push(GameActionE.MOVE_CHARACTER(DirectionE.NONE));
+			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.NONE));
 		}
 		
 		return result;
@@ -384,13 +451,21 @@ class PlayState extends FlxState
 	{
 		switch (newState)
 		{
-			case CONTROL_AVATAR:
-				camera.follow(scenario.main_char());
+			case CONTROL_AVATAR(character, winning_condition, losing_condition):
+				camera.follow(character);
 			case PROTEST_IDLE:
 				camera.follow(null);
-			default:
-				// noop
+			case ARRIVE_MURCIELAGOS: // TODO
+			case ANNOUNCE_NEWS(portrait, name, dialogue): // TODO
 		}
+	}
+	
+	private function pauseToggle()
+	{
+		var newPauseState = !gameState.paused;
+		gameState.paused = newPauseState;
+		pause_screen.visible = !newPauseState;
+		scenario.active = newPauseState;
 	}
 	
 	override public function onFocus():Void 
@@ -401,6 +476,6 @@ class PlayState extends FlxState
 	override public function onFocusLost() : Void
 	{
 		super.onFocusLost();
-		messageQueue.push(PAUSE);
+		inputQueue.push(PAUSE);
 	}
 }
