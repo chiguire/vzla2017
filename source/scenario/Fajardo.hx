@@ -10,7 +10,7 @@ import flixel.util.FlxSort;
 import play.Barrera;
 import play.Character;
 import play.Tanqueta;
-import play.eenum.DirectionE;
+import play.enums.DirectionE;
 
 /**
  * ...
@@ -67,8 +67,8 @@ class Fajardo extends FlxSpriteGroup
 		border_right.makeGraphic(10, Std.int(hw.height), FlxColor.TRANSPARENT);
 		border_right.immovable = true;
 		
-		char1 = new Character(hw.x + 160, FlxG.height / 2, AssetPaths.prs__png);
-		char2 = new Character(hw.x + 140, FlxG.height / 2 - 30, AssetPaths.gnb__png);
+		char1 = new Character(hw.x + 160, FlxG.height / 2);
+		char2 = new Character(hw.x + 140, FlxG.height / 2 - 30, FlxColor.GREEN);
 		tanqueta = new Tanqueta(hw.x + 120, 40);
 		vehiculo2 = new Barrera(hw.x + 170, 60);
 		

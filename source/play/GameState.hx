@@ -1,6 +1,6 @@
 package play;
 
-import play.eenum.GameStateE;
+import play.enums.GameStateE;
 
 /**
  * @author 

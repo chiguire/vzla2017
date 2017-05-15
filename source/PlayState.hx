@@ -12,16 +12,18 @@ import flixel.tweens.FlxTween;
 
 import play.GameKeyboardInputs;
 import play.GameState;
-import play.PauseScreen;
-import play.eenum.DirectionE;
-import play.eenum.GameActionE;
-import play.eenum.GameStateE;
+import screen.PauseScreen;
+import screen.NewsScreen;
+import play.enums.DirectionE;
+import play.enums.GameActionE;
+import play.enums.GameStateE;
 import scenario.Fajardo;
 
 class PlayState extends FlxState
 {
 	var scenario : Fajardo;
 	var pause_screen : PauseScreen;
+	var news_screen : NewsScreen;
 	//var virtual_pad : FlxVirtualPad;
 	var gameState : GameState;
 	
