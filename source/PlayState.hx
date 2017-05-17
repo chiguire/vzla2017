@@ -10,6 +10,7 @@ import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import haxe.ds.GenericStack;
+import play.enums.PortraitE;
 //import flixel.ui.FlxVirtualPad;
 
 import play.GameKeyboardInputs;
@@ -33,7 +34,8 @@ class PlayState extends FlxState
 	
 	var inputQueue : Array<GameActionE>;
 	var messageStack : GenericStack<Iterator<GameActionE>>;
-	var activeTimers : Array<FlxTimer>;
+	var blockingTimers : Array<FlxTimer>;
+	var blockingTweens : Array<FlxTween>;
 	
 	var GAME_KEYBOARD_INPUTS : GameKeyboardInputs = {
 		pause: [FlxKey.P, FlxKey.ESCAPE],
@@ -53,6 +55,9 @@ class PlayState extends FlxState
 		
 		scenario = new Fajardo();
 		add(scenario);
+		
+		news_screen = new NewsScreen();
+		add(news_screen);
 		
 		pause_screen = new PauseScreen(startPaused);
 		add(pause_screen);
@@ -81,7 +86,8 @@ class PlayState extends FlxState
 		);
 		
 		inputQueue = [];
-		activeTimers = [];
+		blockingTimers = [];
+		blockingTweens = [];
 		messageStack = new GenericStack();
 		messageStack.add(scenario.timeline());
 		gameState = {
@@ -108,7 +114,7 @@ class PlayState extends FlxState
 	private function updateTimers()
 	{
 		var timersToRemove = [];
-		for (timer in activeTimers)
+		for (timer in blockingTimers)
 		{
 			if (timer.finished)
 			{
@@ -117,7 +123,20 @@ class PlayState extends FlxState
 		}
 		for (timer in timersToRemove)
 		{
-			timersToRemove.remove(timer);
+			blockingTimers.remove(timer);
+		}
+		
+		var tweensToRemove = [];
+		for (tween in blockingTweens)
+		{
+			if (tween.finished)
+			{
+				tweensToRemove.push(tween);
+			}
+		}
+		for (tween in tweensToRemove)
+		{
+			blockingTweens.remove(tween);
 		}
 	}
 	
@@ -161,7 +180,7 @@ class PlayState extends FlxState
 	
 	private function canStepMessageStack()
 	{
-		return activeTimers.length == 0 &&
+		return blockingTimers.length == 0 &&
 			!messageStack.isEmpty();
 	}
 	
@@ -172,7 +191,7 @@ class PlayState extends FlxState
 			case DELAY_AFTER_ACTION(time, action):
 				var timer = new FlxTimer();
 				timer.start(time);
-				activeTimers.push(timer);
+				blockingTimers.push(timer);
 				gameScreenProcessAction(action);
 			case SEQUENCE(seq):
 				messageStack.add(seq.iterator()); // Will be executed in next update
@@ -219,7 +238,7 @@ class PlayState extends FlxState
 			case MOVE_CAMERA_TO_POSITION(position, tweened):
 				if (tweened)
 				{
-					FlxTween.tween(FlxG.camera.scroll, {x:position.x, y:position.y}, 1);
+					blockingTweens.push(FlxTween.tween(FlxG.camera.scroll, {x:position.x, y:position.y}, 1));
 				}
 				else
 				{
@@ -231,7 +250,6 @@ class PlayState extends FlxState
 				scenario.move_char(direction);
 			case DO_CHARACTER_ACTION(action):
 				scenario.do_char_action(action);
-				
 			case GO_TO_GAME_STATE(state):
 				dealTransition(gameState.state, state);
 				gameState.state = state;
@@ -346,12 +364,13 @@ class PlayState extends FlxState
 			{
 				case ARRIVE_MURCIELAGOS: // TODO	
 				case PROTEST_IDLE:
-					result.push(GO_TO_GAME_STATE(CONTROL_AVATAR(null, null, null)));
+					result.push(GO_TO_GAME_STATE(CONTROL_AVATAR(scenario.main_character(), null, null)));
+					
 				case CONTROL_AVATAR(character, winning_condition, losing_condition):
 					result.push(MOVE_CHARACTER_DIRECTION(NONE));
-					result.push(GO_TO_GAME_STATE(PROTEST_IDLE));
-					result.push(MOVE_CAMERA_TO_POSITION(FlxPoint.get(500, 500), true));
-				case ANNOUNCE_NEWS(portrait, name, dialogue): // TODO
+					result.push(GO_TO_GAME_STATE(ANNOUNCE_NEWS(PortraitE.PORTRAIT_MP, "Miguel Pizarro", "Los muros van a caer")));
+					//result.push(MOVE_CAMERA_TO_POSITION(FlxPoint.get(500, 500), true));
+				case ANNOUNCE_NEWS(portrait, name, dialogue):
 			}
 		}
 		else
@@ -456,7 +475,8 @@ class PlayState extends FlxState
 			case PROTEST_IDLE:
 				camera.follow(null);
 			case ARRIVE_MURCIELAGOS: // TODO
-			case ANNOUNCE_NEWS(portrait, name, dialogue): // TODO
+			case ANNOUNCE_NEWS(portrait, name, dialogue):
+				news_screen.display_segment(portrait, name, dialogue);
 		}
 	}
 	

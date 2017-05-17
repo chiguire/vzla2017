@@ -1,5 +1,6 @@
 package scenario;
 import flixel.FlxG;
+import flixel.FlxObject;
 import flixel.FlxZSprite;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
@@ -136,23 +137,36 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 		{
 			case UPLEFT:
 				char1.velocity.set( -magnitude, -magnitude);
+				char1.facing = FlxObject.UP | FlxObject.LEFT;
 			case UPRIGHT:
 				char1.velocity.set( magnitude, -magnitude);
+				char1.facing = FlxObject.UP | FlxObject.RIGHT;
 			case UP:
 				char1.velocity.set( 0, -magnitude);
+				char1.facing = FlxObject.UP;
 			case LEFT:
 				char1.velocity.set( -magnitude, 0);
+				char1.facing = FlxObject.LEFT;
 			case RIGHT:
 				char1.velocity.set( magnitude, 0);
+				char1.facing = FlxObject.RIGHT;
 			case DOWNLEFT:
 				char1.velocity.set( -magnitude, magnitude);
+				char1.facing = FlxObject.DOWN | FlxObject.LEFT;
 			case DOWNRIGHT:
 				char1.velocity.set( magnitude, magnitude);
+				char1.facing = FlxObject.DOWN| FlxObject.RIGHT;
 			case DOWN:
 				char1.velocity.set( 0, magnitude);
+				char1.facing = FlxObject.DOWN;
 			case NONE:
 				char1.velocity.set( 0, 0);
 		}
+	}
+	
+	public function main_character() : FlxSprite
+	{
+		return char1;
 	}
 	
 	public function do_char_action(action:Int)
@@ -173,6 +187,8 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 	public function timeline() : Iterator<GameActionE>
 	{
 		return [
+			DELAY_AFTER_ACTION(3, NONE),
+			MOVE_CAMERA_TO_POSITION(FlxPoint.get(300, 300), true),
 			
 		].iterator();
 	}

@@ -28,8 +28,8 @@ class Character extends FlxZSprite
 		super(X, Y, 3);
 		
 		loadGraphic(AssetPaths.prs__png, true, 35, 35);
-		setFacingFlip(FlxObject.LEFT,  false, false);
-		setFacingFlip(FlxObject.RIGHT, true,  false);
+		setFacingFlip(FlxObject.LEFT,  true, false);
+		setFacingFlip(FlxObject.RIGHT, false,  false);
 		setFacingFlip(FlxObject.UP,    false, false);
 		setFacingFlip(FlxObject.DOWN,  false, false);
 		
@@ -66,7 +66,7 @@ class Character extends FlxZSprite
 			{
 				if (y_quiet)
 				{
-					if (facing == FlxObject.UP || facing == FlxObject.DOWN)
+					if (facing & FlxObject.UP != 0 || facing & FlxObject.DOWN != 0)
 					{
 						IDLE_UPDOWN;
 					}

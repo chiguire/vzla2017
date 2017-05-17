@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <strings>
-  <file path="source/screen/NewsScreen.hx">
-    <t id="ASDF GHJK">ASDF GHJK</t><!--line 29-->
-  </file>
   <file path="source/screen/PauseScreen.hx">
     <t id="CONTROL: HIDDEN">CONTROL: HIDDEN</t><!--line 137-->
     <t id="CONTROL: SHOWN">CONTROL: SHOWN</t><!--line 133-->
