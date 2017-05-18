@@ -2,6 +2,8 @@ package;
 
 import flixel.FlxBasic;
 import flixel.FlxCamera;
+import flixel.FlxObject;
+import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.FlxG;
 import flixel.input.keyboard.FlxKey;
@@ -10,6 +12,8 @@ import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import haxe.ds.GenericStack;
+import iterators.AbstractIterator;
+import play.enums.AnchorE;
 import play.enums.PortraitE;
 //import flixel.ui.FlxVirtualPad;
 
@@ -22,8 +26,12 @@ import play.enums.GameActionE;
 import play.enums.GameStateE;
 import scenario.Fajardo;
 
+using haxe.EnumTools.EnumValueTools;
+
 class PlayState extends FlxState
 {
+	public static inline var DEBUG_MOVE_CAMERA = false;
+	
 	var scenario : Fajardo;
 	var pause_screen : PauseScreen;
 	var news_screen : NewsScreen;
@@ -33,7 +41,7 @@ class PlayState extends FlxState
 	var stateDebugText : FlxText;
 	
 	var inputQueue : Array<GameActionE>;
-	var messageStack : GenericStack<Iterator<GameActionE>>;
+	var messageStack : GenericStack<AbstractIterator<GameActionE>>;
 	var blockingTimers : Array<FlxTimer>;
 	var blockingTweens : Array<FlxTween>;
 	
@@ -89,7 +97,7 @@ class PlayState extends FlxState
 		blockingTimers = [];
 		blockingTweens = [];
 		messageStack = new GenericStack();
-		messageStack.add(scenario.timeline());
+		messageStack.add(new AbstractIterator(scenario.timeline()));
 		gameState = {
 			paused: startPaused,
 			state: scenario.starting_state()
@@ -180,7 +188,9 @@ class PlayState extends FlxState
 	
 	private function canStepMessageStack()
 	{
-		return blockingTimers.length == 0 &&
+		return 
+			blockingTimers.length == 0 &&
+			blockingTweens.length == 0 &&
 			!messageStack.isEmpty();
 	}
 	
@@ -188,13 +198,12 @@ class PlayState extends FlxState
 	{
 		switch (action)
 		{
-			case DELAY_AFTER_ACTION(time, action):
+			case DELAY_SECONDS(time):
 				var timer = new FlxTimer();
 				timer.start(time);
 				blockingTimers.push(timer);
-				gameScreenProcessAction(action);
 			case SEQUENCE(seq):
-				messageStack.add(seq.iterator()); // Will be executed in next update
+				messageStack.add(new AbstractIterator(seq.iterator())); // Will be executed in next update
 			case SPAWN(seq):
 				for (a in seq)
 				{
@@ -235,21 +244,23 @@ class PlayState extends FlxState
 				pauseToggle();
 			case MOVE_CAMERA(direction):
 				moveCameraDirection(FlxG.camera, direction, 20);
-			case MOVE_CAMERA_TO_POSITION(position, tweened):
-				if (tweened)
-				{
-					blockingTweens.push(FlxTween.tween(FlxG.camera.scroll, {x:position.x, y:position.y}, 1));
-				}
-				else
-				{
-					FlxG.camera.setPosition(position.x, position.y);
-				}
+			case MOVE_CAMERA_TO_POSITION_DIRECT(position, anchor):
+				moveCameraToPosition(position.x, position.y, anchor, false);
+			case MOVE_CAMERA_TO_POSITION_TWEENED(position, anchor, time):
+				moveCameraToPosition(position.x, position.y, anchor, true, time);
+			case MOVE_CAMERA_TO_SPRITE_DIRECT(sprite, anchor):
+				moveCameraToPosition(sprite.x, sprite.y, anchor, false);
+			case MOVE_CAMERA_TO_SPRITE_TWEENED(sprite, anchor, time):
+				moveCameraToPosition(sprite.x, sprite.y, anchor, true, time);
 			case FOLLOW_CAMERA(entity):
 				camera.follow(entity);
-			case MOVE_CHARACTER_DIRECTION(direction):
-				scenario.move_char(direction);
+			case MOVE_SPRITE_DIRECTION(sprite, direction):
+				move_sprite(sprite, direction);
 			case DO_CHARACTER_ACTION(action):
 				scenario.do_char_action(action);
+			case ANNOUNCE_NEWS(portrait, name, dialogue):
+				move_sprite(scenario.main_character(), NONE);
+				news_screen.display_segment(portrait, name, dialogue);
 			case GO_TO_GAME_STATE(state):
 				dealTransition(gameState.state, state);
 				gameState.state = state;
@@ -259,8 +270,8 @@ class PlayState extends FlxState
 			// noop
 			case SEQUENCE(_):
 			case SPAWN(_):
-			case MOVE_CHARACTER_TO_POS(_):
-			case DELAY_AFTER_ACTION(_,_):
+			case MOVE_SPRITE_TO_POS(_):
+			case DELAY_SECONDS(_):
 			case MOVE_CURSOR(_):
 			case NONE:
 		}
@@ -304,6 +315,30 @@ class PlayState extends FlxState
 		camera.scroll.y += y;
 	}
 	
+	private function moveCameraToPosition(x:Float, y:Float, anchor:AnchorE, tweened:Bool, ?time:Float)
+	{
+		var offset = FlxPoint.get(
+			switch(anchor)
+			{
+				case TOPLEFT: 0;
+				case CENTER: FlxG.width / 2.0;
+			},
+			switch(anchor)
+			{
+				case TOPLEFT: 0;
+				case CENTER: FlxG.height/ 2.0;
+			}
+		);
+		if (tweened)
+		{
+			blockingTweens.push(FlxTween.tween(FlxG.camera.scroll, {x:x - offset.x, y:y - offset.y}, time));
+		}
+		else
+		{
+			FlxG.camera.setPosition(x - offset.x, y - offset.y);
+		}
+	}
+	
 	private function updateRender()
 	{
 		stateDebugText.text = "State: " + Std.string(gameState.state);
@@ -335,13 +370,12 @@ class PlayState extends FlxState
 		{
 			switch (gameState.state)
 			{
-				case GameStateE.PROTEST_IDLE:
+				case GameStateE.CUTSCENE:
 					//no player op, just pause or quit
 					return justAppActions();
 				case GameStateE.CONTROL_AVATAR(_,_,_):
-					return moveCharacter().concat(justAppActions());
-				case ARRIVE_MURCIELAGOS:
-				case ANNOUNCE_NEWS(_,_,_):
+					return moveCharacterActions()
+						.concat(justAppActions());
 			}
 		}
 		return [];
@@ -362,108 +396,79 @@ class PlayState extends FlxState
 		{
 			switch (gameState.state)
 			{
-				case ARRIVE_MURCIELAGOS: // TODO	
-				case PROTEST_IDLE:
+				case CUTSCENE:
 					result.push(GO_TO_GAME_STATE(CONTROL_AVATAR(scenario.main_character(), null, null)));
-					
 				case CONTROL_AVATAR(character, winning_condition, losing_condition):
-					result.push(MOVE_CHARACTER_DIRECTION(NONE));
-					result.push(GO_TO_GAME_STATE(ANNOUNCE_NEWS(PortraitE.PORTRAIT_MP, "Miguel Pizarro", "Los muros van a caer")));
-					//result.push(MOVE_CAMERA_TO_POSITION(FlxPoint.get(500, 500), true));
-				case ANNOUNCE_NEWS(portrait, name, dialogue):
+					result.push(ANNOUNCE_NEWS(PortraitE.PORTRAIT_MP, "Miguel Pizarro", "Los muros van a caer"));
 			}
 		}
 		else
 		{
-			// move camera
-			var up    = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.up);
-			var down  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.down);
-			var left  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.left);
-			var right = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.right);
-			if (up && left)
+			if (DEBUG_MOVE_CAMERA)
 			{
-				result.push(GameActionE.MOVE_CAMERA(DirectionE.UPLEFT));
-			}
-			else if (up && right)
-			{
-				result.push(GameActionE.MOVE_CAMERA(DirectionE.UPRIGHT));
-			}
-			else if (up && !left && !right)
-			{
-				result.push(GameActionE.MOVE_CAMERA(DirectionE.UP));
-			}
-			else if (left && !up && !down)
-			{
-				result.push(GameActionE.MOVE_CAMERA(DirectionE.LEFT));
-			}
-			else if (right && !up && !down)
-			{
-				result.push(GameActionE.MOVE_CAMERA(DirectionE.RIGHT));
-			}
-			else if (down && left)
-			{
-				result.push(GameActionE.MOVE_CAMERA(DirectionE.DOWNLEFT));
-			}
-			else if (down && right)
-			{
-				result.push(GameActionE.MOVE_CAMERA(DirectionE.DOWNRIGHT));
-			}
-			else if (down && !left && !right)
-			{
-				result.push(GameActionE.MOVE_CAMERA(DirectionE.DOWN));
+				// move camera
+				var up    = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.up);
+				var down  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.down);
+				var left  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.left);
+				var right = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.right);
+				if (up && left)
+				{
+					result.push(GameActionE.MOVE_CAMERA(DirectionE.UPLEFT));
+				}
+				else if (up && right)
+				{
+					result.push(GameActionE.MOVE_CAMERA(DirectionE.UPRIGHT));
+				}
+				else if (up && !left && !right)
+				{
+					result.push(GameActionE.MOVE_CAMERA(DirectionE.UP));
+				}
+				else if (left && !up && !down)
+				{
+					result.push(GameActionE.MOVE_CAMERA(DirectionE.LEFT));
+				}
+				else if (right && !up && !down)
+				{
+					result.push(GameActionE.MOVE_CAMERA(DirectionE.RIGHT));
+				}
+				else if (down && left)
+				{
+					result.push(GameActionE.MOVE_CAMERA(DirectionE.DOWNLEFT));
+				}
+				else if (down && right)
+				{
+					result.push(GameActionE.MOVE_CAMERA(DirectionE.DOWNRIGHT));
+				}
+				else if (down && !left && !right)
+				{
+					result.push(GameActionE.MOVE_CAMERA(DirectionE.DOWN));
+				}
 			}
 		}
 		
 		return result;
 	}
 	
-	private function moveCharacter() : Array<GameActionE>
+	private function moveCharacterActions() : Array<GameActionE>
 	{
-		var result = [];
-		
 		// move character
 		var up    = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.up);
 		var down  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.down);
 		var left  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.left);
 		var right = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.right);
-		if (up && left)
-		{
-			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.UPLEFT));
-		}
-		else if (up && right)
-		{
-			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.UPRIGHT));
-		}
-		else if (up && !left && !right)
-		{
-			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.UP));
-		}
-		else if (left && !up && !down)
-		{
-			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.LEFT));
-		}
-		else if (right && !up && !down)
-		{
-			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.RIGHT));
-		}
-		else if (down && left)
-		{
-			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.DOWNLEFT));
-		}
-		else if (down && right)
-		{
-			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.DOWNRIGHT));
-		}
-		else if (down && !left && !right)
-		{
-			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.DOWN));
-		}
-		else
-		{
-			result.push(GameActionE.MOVE_CHARACTER_DIRECTION(DirectionE.NONE));
-		}
-		
-		return result;
+		var character = scenario.main_character();
+		return [GameActionE.MOVE_SPRITE_DIRECTION(
+			character, 
+			if (up && left) { DirectionE.UPLEFT; }
+			else if (up && right) { DirectionE.UPRIGHT; }
+			else if (up && !left && !right) { DirectionE.UP; }
+			else if (left && !up && !down) { DirectionE.LEFT; }
+			else if (right && !up && !down) { DirectionE.RIGHT; }
+			else if (down && left) { DirectionE.DOWNLEFT; }
+			else if (down && right) { DirectionE.DOWNRIGHT; }
+			else if (down && !left && !right) { DirectionE.DOWN; }
+			else { DirectionE.NONE; }
+		)];
 	}
 	
 	private function dealTransition(oldState:Null<GameStateE>, newState:GameStateE)
@@ -472,11 +477,8 @@ class PlayState extends FlxState
 		{
 			case CONTROL_AVATAR(character, winning_condition, losing_condition):
 				camera.follow(character);
-			case PROTEST_IDLE:
+			case CUTSCENE:
 				camera.follow(null);
-			case ARRIVE_MURCIELAGOS: // TODO
-			case ANNOUNCE_NEWS(portrait, name, dialogue):
-				news_screen.display_segment(portrait, name, dialogue);
 		}
 	}
 	
@@ -497,5 +499,39 @@ class PlayState extends FlxState
 	{
 		super.onFocusLost();
 		inputQueue.push(PAUSE);
+	}
+	
+	private function move_sprite(sprite:FlxSprite, direction:DirectionE)
+	{
+		var magnitude : Int = 100;
+		switch (direction)
+		{
+			case UPLEFT:
+				sprite.velocity.set( -magnitude, -magnitude);
+				sprite.facing = FlxObject.UP | FlxObject.LEFT;
+			case UPRIGHT:
+				sprite.velocity.set( magnitude, -magnitude);
+				sprite.facing = FlxObject.UP | FlxObject.RIGHT;
+			case UP:
+				sprite.velocity.set( 0, -magnitude);
+				sprite.facing = FlxObject.UP;
+			case LEFT:
+				sprite.velocity.set( -magnitude, 0);
+				sprite.facing = FlxObject.LEFT;
+			case RIGHT:
+				sprite.velocity.set( magnitude, 0);
+				sprite.facing = FlxObject.RIGHT;
+			case DOWNLEFT:
+				sprite.velocity.set( -magnitude, magnitude);
+				sprite.facing = FlxObject.DOWN | FlxObject.LEFT;
+			case DOWNRIGHT:
+				sprite.velocity.set( magnitude, magnitude);
+				sprite.facing = FlxObject.DOWN| FlxObject.RIGHT;
+			case DOWN:
+				sprite.velocity.set( 0, magnitude);
+				sprite.facing = FlxObject.DOWN;
+			case NONE:
+				sprite.velocity.set( 0, 0);
+		}
 	}
 }

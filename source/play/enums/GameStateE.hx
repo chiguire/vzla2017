@@ -6,8 +6,6 @@ import flixel.FlxSprite;
  */
 enum GameStateE 
 {
-	PROTEST_IDLE;
-	ARRIVE_MURCIELAGOS;
+	CUTSCENE;
 	CONTROL_AVATAR(character:FlxSprite, winning_condition:ScenarioCondition, losing_condition:ScenarioCondition);
-	ANNOUNCE_NEWS(portrait:PortraitE, name:String, dialogue:String);
 }

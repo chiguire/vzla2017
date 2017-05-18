@@ -26,6 +26,7 @@ class NewsScreen extends FlxSpriteGroup
 	private var title_bg : FlxSprite;
 	private var portrait : FlxSprite;
 	private var title_text : FlxText;
+	private var dialogue_bg : FlxSprite;
 	private var dialogue_text : FlxText;
 	
 	private var state : NewsScreenState;
@@ -35,6 +36,7 @@ class NewsScreen extends FlxSpriteGroup
 	private static inline var dialogue_left_margin = 10;
 	private static inline var dialogue_top_margin = 10;
 	private static inline var active_time = 6;
+	private static inline var transition_time = 0.3;
 	
 	public function initiliase_portraits()
 	{
@@ -64,6 +66,9 @@ class NewsScreen extends FlxSpriteGroup
 		
 		title_text  = new FlxText(title_left_margin, FlxG.height - 36, FlxG.width - 60, "");
 		
+		dialogue_bg = new FlxSprite(dialogue_left_margin, dialogue_top_margin);
+		dialogue_bg.makeGraphic(FlxG.width - (2 * dialogue_left_margin), 100, FlxColor.fromRGB(0, 0, 0, 127));
+		
 		dialogue_text = new FlxText(dialogue_left_margin, dialogue_top_margin, FlxG.width - (2 * dialogue_left_margin), "", 8);
 		dialogue_text.wordWrap = true;
 		
@@ -74,6 +79,7 @@ class NewsScreen extends FlxSpriteGroup
 		}
 		add(title_bg);
 		add(title_text);
+		add(dialogue_bg);
 		add(dialogue_text);
 		
 		visible = false;
@@ -89,32 +95,31 @@ class NewsScreen extends FlxSpriteGroup
 			FlxG.log.error(error_msg);
 			throw error_msg;
 		}
-		FlxG.log.notice("BEING CALLED");
 		visible = true;
 		Lambda.foreach(portraits, function (p:FlxSprite) { p.visible = false; return true; });
 		portrait = portraits.get(new_portrait);
 		portrait.visible = true;
 		portrait.x = (FlxG.width - portrait.width) / 2.0;
 		portrait.y = FlxG.height;
-		FlxTween.linearMotion(portrait, portrait.x, portrait.y, portrait.x, FlxG.height - portrait.height, 1.0)
+		FlxTween.linearMotion(portrait, portrait.x, portrait.y, portrait.x, FlxG.height - portrait.height, transition_time)
 			.wait(active_time)
 			.then(
-				FlxTween.linearMotion(portrait, portrait.x, FlxG.height - portrait.height, portrait.x, portrait.y, 1.0)
+				FlxTween.linearMotion(portrait, portrait.x, FlxG.height - portrait.height, portrait.x, portrait.y, transition_time)
 			);
 		
 		title_bg.x = -title_bg.width;
-		FlxTween.linearMotion(title_bg, title_bg.x, title_bg.y, 0, title_bg.y, 1)
+		FlxTween.linearMotion(title_bg, title_bg.x, title_bg.y, 0, title_bg.y, transition_time)
 			.wait(active_time)
 			.then(
-				FlxTween.linearMotion(title_bg, 0, title_bg.y, title_bg.x, title_bg.y, 1)
+				FlxTween.linearMotion(title_bg, 0, title_bg.y, title_bg.x, title_bg.y, transition_time)
 			);
 		
 		title_text.text = name;
 		title_text.x = -title_bg.width + title_left_margin;
-		FlxTween.linearMotion(title_text, title_text.x, title_text.y, title_left_margin, title_text.y, 1)
+		FlxTween.linearMotion(title_text, title_text.x, title_text.y, title_left_margin, title_text.y, transition_time)
 			.wait(active_time)
 			.then(
-				FlxTween.linearMotion(title_text, title_left_margin, title_text.y, title_text.x, title_text.y, 1)
+				FlxTween.linearMotion(title_text, title_left_margin, title_text.y, title_text.x, title_text.y, transition_time)
 			);
 		
 		var tween_options_states_between : NewsScreenState -> NewsScreenState -> TweenOptions = function (st_start, st_end) {
@@ -124,12 +129,19 @@ class NewsScreen extends FlxSpriteGroup
 			}
 		};
 		
-		dialogue_text.text = dialogue;
-		dialogue_text.alpha = 0;
-		FlxTween.tween(dialogue_text, {alpha:1.0}, 1, tween_options_states_between(APPEARING, VISIBLE))
+		dialogue_bg.alpha = 0;
+		FlxTween.tween(dialogue_bg, {alpha: 1.0}, transition_time)
 			.wait(active_time)
 			.then(
-				FlxTween.tween(dialogue_text, {alpha:0.0}, 1, tween_options_states_between(DISAPPEARING, FINISHED))
+				FlxTween.tween(dialogue_bg, {alpha: 0.0}, transition_time)
+			);
+		
+		dialogue_text.text = dialogue;
+		dialogue_text.alpha = 0;
+		FlxTween.tween(dialogue_text, {alpha:1.0}, transition_time, tween_options_states_between(APPEARING, VISIBLE))
+			.wait(active_time)
+			.then(
+				FlxTween.tween(dialogue_text, {alpha:0.0}, transition_time, tween_options_states_between(DISAPPEARING, FINISHED))
 			);
 	}
 	
@@ -145,6 +157,11 @@ class NewsScreen extends FlxSpriteGroup
 		{
 			visible = false;
 		}
+	}
+	
+	public static function total_news_time()
+	{
+		return 2 * transition_time + active_time;
 	}
 }
 

@@ -5,6 +5,7 @@ package play.enums;
  */
 enum PortraitE 
 {
+	NONE;
 	PORTRAIT_DS;
 	PORTRAIT_FG;
 	PORTRAIT_LOD;

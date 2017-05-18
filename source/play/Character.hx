@@ -7,6 +7,7 @@ import flixel.math.FlxRandom;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.util.FlxColor;
+import play.enums.DirectionE;
 
 /**
  * ...
@@ -28,7 +29,7 @@ class Character extends FlxZSprite
 		super(X, Y, 3);
 		
 		loadGraphic(AssetPaths.prs__png, true, 35, 35);
-		setFacingFlip(FlxObject.LEFT,  true, false);
+		setFacingFlip(FlxObject.LEFT,  false, false);
 		setFacingFlip(FlxObject.RIGHT, false,  false);
 		setFacingFlip(FlxObject.UP,    false, false);
 		setFacingFlip(FlxObject.DOWN,  false, false);

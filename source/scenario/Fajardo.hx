@@ -15,6 +15,8 @@ import play.Tanqueta;
 import play.enums.DirectionE;
 import play.enums.GameStateE;
 import play.enums.GameActionE;
+import play.enums.PortraitE;
+import screen.NewsScreen;
 
 /**
  * ...
@@ -130,40 +132,6 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 		entities.sort(FlxZSprite.byZ, FlxSort.ASCENDING);
 	}
 	
-	public function move_char(direction:DirectionE)
-	{
-		var magnitude : Int = 100;
-		switch (direction)
-		{
-			case UPLEFT:
-				char1.velocity.set( -magnitude, -magnitude);
-				char1.facing = FlxObject.UP | FlxObject.LEFT;
-			case UPRIGHT:
-				char1.velocity.set( magnitude, -magnitude);
-				char1.facing = FlxObject.UP | FlxObject.RIGHT;
-			case UP:
-				char1.velocity.set( 0, -magnitude);
-				char1.facing = FlxObject.UP;
-			case LEFT:
-				char1.velocity.set( -magnitude, 0);
-				char1.facing = FlxObject.LEFT;
-			case RIGHT:
-				char1.velocity.set( magnitude, 0);
-				char1.facing = FlxObject.RIGHT;
-			case DOWNLEFT:
-				char1.velocity.set( -magnitude, magnitude);
-				char1.facing = FlxObject.DOWN | FlxObject.LEFT;
-			case DOWNRIGHT:
-				char1.velocity.set( magnitude, magnitude);
-				char1.facing = FlxObject.DOWN| FlxObject.RIGHT;
-			case DOWN:
-				char1.velocity.set( 0, magnitude);
-				char1.facing = FlxObject.DOWN;
-			case NONE:
-				char1.velocity.set( 0, 0);
-		}
-	}
-	
 	public function main_character() : FlxSprite
 	{
 		return char1;
@@ -181,15 +149,20 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 	
 	public function starting_state() : GameStateE
 	{
-		return GameStateE.PROTEST_IDLE;
+		return GameStateE.CUTSCENE;
 	}
 	
 	public function timeline() : Iterator<GameActionE>
 	{
 		return [
-			DELAY_AFTER_ACTION(3, NONE),
-			MOVE_CAMERA_TO_POSITION(FlxPoint.get(300, 300), true),
-			
+			DELAY_SECONDS(3),
+			//MOVE_CAMERA_TO_POSITION(FlxPoint.get(300, 300), true),
+			MOVE_CAMERA_TO_SPRITE_TWEENED(char1, CENTER, 1.0),
+			GO_TO_GAME_STATE(CONTROL_AVATAR(char1, null, null)),
+			DELAY_SECONDS(10),
+			ANNOUNCE_NEWS(PortraitE.PORTRAIT_NR, "Nestor Reverol", "Aqui hay juerza"),
+			DELAY_SECONDS(NewsScreen.total_news_time()),
+			GO_TO_GAME_STATE(CONTROL_AVATAR(char1, null, null)),
 		].iterator();
 	}
 }
