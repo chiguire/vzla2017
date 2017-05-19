@@ -24,7 +24,11 @@ enum GameActionE
 	DELAY_SECONDS(time:Float);
 	SEQUENCE(seq:Array<GameActionE>);
 	SPAWN(seq:Array<GameActionE>);
+
+	CURTAIN_FADE_IN(time:Float);
+	CURTAIN_FADE_OUT(time:Float);
 	
+	DISPLAY_TVSTATIC(time:Float);
 	ANNOUNCE_NEWS(portrait:PortraitE, name:String, dialogue:String);
 	
 	MOVE_SPRITE_DIRECTION(sprite:FlxSprite, direction:DirectionE);

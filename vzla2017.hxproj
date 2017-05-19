@@ -32,7 +32,7 @@
     <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="False" />
-    <option additional="#--macro keep('IntIterator')&#xA;--remap flash:openfl&#xA;--macro flixel.system.macros.FlxDefines.run()&#xA;--macro allowPackage(&quot;flash&quot;)&#xA;-debug " />
+    <option additional="--remap flash:openfl&#xA;--macro flixel.system.macros.FlxDefines.run()&#xA;--macro allowPackage(&quot;flash&quot;)&#xA;-debug " />
   </build>
   <!-- haxelib libraries -->
   <haxelib>

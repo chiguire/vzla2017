@@ -10,11 +10,14 @@ import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxPoint;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import haxe.ds.GenericStack;
 import iterators.AbstractIterator;
 import play.enums.AnchorE;
 import play.enums.PortraitE;
+import screen.CurtainScreen;
+import screen.TVStaticScreen;
 //import flixel.ui.FlxVirtualPad;
 
 import play.GameKeyboardInputs;
@@ -35,6 +38,8 @@ class PlayState extends FlxState
 	var scenario : Fajardo;
 	var pause_screen : PauseScreen;
 	var news_screen : NewsScreen;
+	var static_screen : TVStaticScreen;
+	var curtain_screen : CurtainScreen;
 	//var virtual_pad : FlxVirtualPad;
 	var gameState : GameState;
 	
@@ -59,32 +64,36 @@ class PlayState extends FlxState
 	{
 		super.create();
 		
-		var startPaused = false;
-		
 		scenario = new Fajardo();
-		add(scenario);
-		
+		gameState = scenario.starting_state();
 		news_screen = new NewsScreen();
-		add(news_screen);
-		
-		pause_screen = new PauseScreen(startPaused);
-		add(pause_screen);
+		static_screen = new TVStaticScreen(gameState.tv_static_active);
+		curtain_screen = new CurtainScreen(gameState.curtain_alpha);
+		pause_screen = new PauseScreen(gameState.paused);
 		
 		//virtual_pad = new FlxVirtualPad(FlxDPadMode.FULL, FlxActionMode.A_B);
 		//virtual_pad.x = 5;
 		//virtual_pad.y = FlxG.height - 160;
-		//add(virtual_pad);
 		
 		stateDebugText = new FlxText(5, FlxG.height - 15, FlxG.width - 10, "State:");
 		stateDebugText.scrollFactor.set();
-		add(stateDebugText);
 		
+		add(scenario);
+		add(news_screen);
+		add(static_screen);
+		add(curtain_screen);
+		add(pause_screen);
+		//add(virtual_pad);
+		add(stateDebugText);
+
 		var scenarioBounds = scenario.worldBounds();
 		
 		camera.minScrollX = scenarioBounds.left;
 		camera.maxScrollX = scenarioBounds.right;
 		camera.minScrollY = scenarioBounds.top;
 		camera.maxScrollY = scenarioBounds.bottom;
+		camera.scroll.set(gameState.camera_position.x, gameState.camera_position.y);
+		
 		//FlxG.log.error("right: "+ scenarioBounds.right + ". bottom: "+scenarioBounds.bottom);
 		FlxG.worldBounds.set(
 			scenarioBounds.left   - 100, 
@@ -98,10 +107,6 @@ class PlayState extends FlxState
 		blockingTweens = [];
 		messageStack = new GenericStack();
 		messageStack.add(new AbstractIterator(scenario.timeline()));
-		gameState = {
-			paused: startPaused,
-			state: scenario.starting_state()
-		};
 		
 		dealTransition(null, gameState.state);
 	}
@@ -214,6 +219,10 @@ class PlayState extends FlxState
 		}
 	}
 	
+	/**
+	 * Process game actions when the game is paused
+	 * @param	gameAction
+	 */
 	private function pauseScreenProcessAction(gameAction:GameActionE)
 	{
 		switch (gameAction)
@@ -236,34 +245,62 @@ class PlayState extends FlxState
 		}
 	}
 	
+	/**
+	 * Process game actions when the game is NOT paused
+	 * @param	gameAction
+	 */
 	private function gameScreenProcessAction(gameAction:GameActionE)
 	{
 		switch (gameAction)
 		{
 			case PAUSE:
 				pauseToggle();
+				
 			case MOVE_CAMERA(direction):
 				moveCameraDirection(FlxG.camera, direction, 20);
+				
 			case MOVE_CAMERA_TO_POSITION_DIRECT(position, anchor):
 				moveCameraToPosition(position.x, position.y, anchor, false);
+				
 			case MOVE_CAMERA_TO_POSITION_TWEENED(position, anchor, time):
 				moveCameraToPosition(position.x, position.y, anchor, true, time);
+				
 			case MOVE_CAMERA_TO_SPRITE_DIRECT(sprite, anchor):
 				moveCameraToPosition(sprite.x, sprite.y, anchor, false);
+				
 			case MOVE_CAMERA_TO_SPRITE_TWEENED(sprite, anchor, time):
+				
 				moveCameraToPosition(sprite.x, sprite.y, anchor, true, time);
+				
 			case FOLLOW_CAMERA(entity):
 				camera.follow(entity);
+				
+			case CURTAIN_FADE_IN(time):
+				FlxTween.tween(curtain_screen, {alpha: 0}, time);
+				
+			case CURTAIN_FADE_OUT(time):
+				FlxTween.tween(curtain_screen, {alpha: 1}, time);
+				
 			case MOVE_SPRITE_DIRECTION(sprite, direction):
 				move_sprite(sprite, direction);
+				
 			case DO_CHARACTER_ACTION(action):
 				scenario.do_char_action(action);
+			
+			case DISPLAY_TVSTATIC(time):
+				static_screen.setStaticActive(true);
+				var timer = new FlxTimer();
+				timer.start(time, function (t:FlxTimer) { static_screen.setStaticActive(false); });
+				blockingTimers.push(timer);
+				
 			case ANNOUNCE_NEWS(portrait, name, dialogue):
 				move_sprite(scenario.main_character(), NONE);
 				news_screen.display_segment(portrait, name, dialogue);
+				
 			case GO_TO_GAME_STATE(state):
 				dealTransition(gameState.state, state);
 				gameState.state = state;
+				
 			case GO_TO_FLIXEL_STATE(state):
 				FlxG.switchState(cast Type.createInstance(state, []));
 				
@@ -341,6 +378,8 @@ class PlayState extends FlxState
 	
 	private function updateRender()
 	{
+		gameState.camera_position.x = camera.scroll.x;
+		gameState.camera_position.y = camera.scroll.y;
 		stateDebugText.text = "State: " + Std.string(gameState.state);
 	}
 	

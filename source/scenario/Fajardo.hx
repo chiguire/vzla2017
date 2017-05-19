@@ -11,6 +11,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxSort;
 import play.Barrera;
 import play.Character;
+import play.GameState;
 import play.Tanqueta;
 import play.enums.DirectionE;
 import play.enums.GameStateE;
@@ -147,19 +148,28 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 		return FlxPoint.get(100, 100);
 	}
 	
-	public function starting_state() : GameStateE
+	public function starting_state() : GameState
 	{
-		return GameStateE.CUTSCENE;
+		return {
+			paused : false,
+			state : CUTSCENE,
+			curtain_alpha : 1.0,
+			tv_static_active : false,
+			camera_position: FlxPoint.get(100, 100),
+		};
 	}
 	
 	public function timeline() : Iterator<GameActionE>
 	{
 		return [
+			CURTAIN_FADE_IN(1),
 			DELAY_SECONDS(3),
+			DISPLAY_TVSTATIC(0.25),
 			//MOVE_CAMERA_TO_POSITION(FlxPoint.get(300, 300), true),
 			MOVE_CAMERA_TO_SPRITE_TWEENED(char1, CENTER, 1.0),
 			GO_TO_GAME_STATE(CONTROL_AVATAR(char1, null, null)),
 			DELAY_SECONDS(10),
+			GO_TO_GAME_STATE(CUTSCENE),
 			ANNOUNCE_NEWS(PortraitE.PORTRAIT_NR, "Nestor Reverol", "Aqui hay juerza"),
 			DELAY_SECONDS(NewsScreen.total_news_time()),
 			GO_TO_GAME_STATE(CONTROL_AVATAR(char1, null, null)),
