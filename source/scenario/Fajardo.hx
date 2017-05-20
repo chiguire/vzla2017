@@ -25,6 +25,8 @@ import screen.NewsScreen;
  */
 class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 {
+	public static inline var MARCHA_SIZE : Int = 30;
+	public static inline var GUARDIA_SIZE :Int = 8;
 
 	var bg : FlxSprite;
 	var guaire : FlxSprite;
@@ -39,10 +41,11 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 	var fg : FlxSpriteGroup;
 	var entities : FlxSpriteGroup;
 	
-	var char1 : Character;
-	var char2 : Character;
-	var tanqueta : Tanqueta;
-	var vehiculo2 : FlxZSprite;
+	var diputado: Character;
+	var marcha : Array<Character>;
+	var guardia : Array<Character>;
+	var barrera1 : Barrera;
+	var barrera2 : Barrera;
 	
 	var goal : FlxZSprite;
 	var lose : FlxZSprite;
@@ -55,7 +58,7 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 		bg.scrollFactor.set(0.8, 0.8);
 		
 		guaire = new FlxSprite(59, 0, AssetPaths.river__png);
-		guaire2 = new FlxSprite(59, -guaire.height, AssetPaths.river__png);
+		guaire2 = new FlxSprite(59, -guaire.height-0.5, AssetPaths.river__png);
 		guaire.velocity.y = 100;
 		guaire2.velocity.y = 100;
 		
@@ -77,19 +80,67 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 		border_right.makeGraphic(10, Std.int(hw.height), FlxColor.TRANSPARENT);
 		border_right.immovable = true;
 		
-		char1 = new Character(hw.x + 160, FlxG.height / 2);
-		char2 = new Character(hw.x + 140, FlxG.height / 2 - 30, FlxColor.GREEN);
-		tanqueta = new Tanqueta(hw.x + 120, 40);
-		vehiculo2 = new Barrera(hw.x + 170, 60);
+		var marcha_centro = FlxPoint.get(hw.x + (hw.width / 2.0), worldBounds().height / 4.0);
 		
-		goal = new FlxZSprite(hw.x + 160, FlxG.height / 2 + 300, 35);
-		goal.makeGraphic(35, 35, FlxColor.RED);
-		goal.immovable = true;
+		diputado = new Character(marcha_centro.x, marcha_centro.y, PRS, FlxColor.ORANGE);
+		marcha = [];
+		for (i in 0...MARCHA_SIZE)
+		{
+			var min_x = (marcha_centro.x - (0.8 * hw.width / 2.0));
+			var max_x = (marcha_centro.x + (0.8 * hw.width / 2.0));
+			var min_y = (marcha_centro.y - 50);
+			var max_y = (marcha_centro.y + 50);
+			
+			var x = FlxG.random.float(min_x, max_x);
+			var y = FlxG.random.float(min_y, max_y);
+			
+			var which = FlxG.random.int(0, 2);
+			var hue = switch (which)
+				{
+					case 0: FlxG.random.float(   0 - 10,   0 + 10); // red
+					case 1: FlxG.random.float(  40 - 10,  40 + 10); // yellow
+					case 2: FlxG.random.float( 240 - 10, 240 + 10); // blue
+					default: throw "WAT?";
+				};
+			var saturation = switch (which)
+				{
+					case 0: FlxG.random.float(0.6, 0.8); // red
+					case 1: FlxG.random.float(0.6, 1.8); // yellow
+					case 2: FlxG.random.float(0.6, 0.8); // blue
+					default: throw "WAT?";
+				};
+			var brightness = switch (which)
+				{
+					case 0: FlxG.random.float(0.6, 0.8); // red
+					case 1: FlxG.random.float(0.8, 1.0); // yellow
+					case 2: FlxG.random.float(0.6, 0.8); // blue
+					default: throw "WAT?";
+				};
+				
+			var color = FlxColor.fromHSB(hue, saturation, brightness, 1);
+			marcha.push(new Character(x, y, PRS, color));
+		}
 		
-		lose= new FlxZSprite(hw.x + 200, FlxG.height / 2 + 300, 35);
-		lose.makeGraphic(35, 35, FlxColor.YELLOW);
-		lose.immovable = true;
+		guardia = [];
+		for (i in 0...GUARDIA_SIZE)
+		{
+			guardia.push(new Character(
+				hw.x + 10 + ((hw.width - 20) * i / GUARDIA_SIZE), 
+				FlxG.height / 2 - 30, 
+				GNB, 
+				FlxColor.GREEN)
+			);
+		}
+		barrera1 = new Barrera(hw.x + 30, 40);
+		barrera2 = new Barrera(hw.x + 170, 40);
 		
+		//goal = new FlxZSprite(hw.x + 160, FlxG.height / 2 + 300, 35);
+		//goal.makeGraphic(35, 35, FlxColor.RED);
+		//goal.immovable = true;
+		
+		//lose= new FlxZSprite(hw.x + 200, FlxG.height / 2 + 300, 35);
+		//lose.makeGraphic(35, 35, FlxColor.YELLOW);
+		//lose.immovable = true;
 		
 		fg = new FlxSpriteGroup();
 		entities = new FlxSpriteGroup();
@@ -100,12 +151,13 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 		fg.add(border_right);
 		fg.add(entities);
 		
-		entities.add(char1);
-		entities.add(char2);
-		entities.add(tanqueta);
-		entities.add(vehiculo2);
-		entities.add(goal);
-		entities.add(lose);
+		for (m in marcha) { entities.add(m); m.protest(); }
+		entities.add(diputado);
+		for (g in guardia) { entities.add(g); }
+		entities.add(barrera1);
+		entities.add(barrera2);
+		//entities.add(goal);
+		//entities.add(lose);
 		
 		add(bg);
 		add(guaire);
@@ -114,7 +166,7 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 		add(fg);
 	}
 	
-	public function worldBounds() : FlxRect
+	public inline function worldBounds() : FlxRect
 	{
 		return new FlxRect(0, 0, 1024, 1024);
 	}
@@ -128,14 +180,13 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 			guaire.y -= 1024;
 			guaire2.y -= 1024;
 		}
-		
 		FlxG.collide(fg);
 		entities.sort(FlxZSprite.byZ, FlxSort.ASCENDING);
 	}
 	
 	public function main_character() : FlxSprite
 	{
-		return char1;
+		return diputado;
 	}
 	
 	public function do_char_action(action:Int)
@@ -155,24 +206,25 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 			state : CUTSCENE,
 			curtain_alpha : 1.0,
 			tv_static_active : false,
-			camera_position: FlxPoint.get(100, 100),
+			camera_position: FlxPoint.get(hw.x + hw.width / 2.0 - FlxG.width / 2.0, worldBounds().height - FlxG.height),
+			//camera_position: FlxPoint.get(diputado.x - FlxG.width / 2.0, diputado.y - FlxG.height / 2.0),
 		};
 	}
 	
 	public function timeline() : Iterator<GameActionE>
 	{
 		return [
-			CURTAIN_FADE_IN(1),
-			DELAY_SECONDS(3),
-			DISPLAY_TVSTATIC(0.25),
+			CURTAIN_FADE_IN(0.5),
+			DISPLAY_TVSTATIC(0.75),
+			DELAY_SECONDS(2),
 			//MOVE_CAMERA_TO_POSITION(FlxPoint.get(300, 300), true),
-			MOVE_CAMERA_TO_SPRITE_TWEENED(char1, CENTER, 1.0),
-			GO_TO_GAME_STATE(CONTROL_AVATAR(char1, null, null)),
+			MOVE_CAMERA_TO_SPRITE_TWEENED(diputado, CENTER, 1.0),
+			GO_TO_GAME_STATE(CONTROL_AVATAR(diputado, null, null)),
 			DELAY_SECONDS(10),
 			GO_TO_GAME_STATE(CUTSCENE),
 			ANNOUNCE_NEWS(PortraitE.PORTRAIT_NR, "Nestor Reverol", "Aqui hay juerza"),
 			DELAY_SECONDS(NewsScreen.total_news_time()),
-			GO_TO_GAME_STATE(CONTROL_AVATAR(char1, null, null)),
+			GO_TO_GAME_STATE(CONTROL_AVATAR(diputado, null, null)),
 		].iterator();
 	}
 }

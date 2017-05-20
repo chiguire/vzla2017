@@ -25,6 +25,6 @@ class Barrera extends FlxZSprite
 		flx_bounds = new FlxObject(bounds.x, bounds.y, bounds.width, bounds.height);
 		flx_bounds.solid = false;
 		
-		immovable = false;
+		immovable = true;
 	}	
 }

@@ -19,15 +19,19 @@ class TVStaticScreen extends FlxSpriteGroup
 		super();
 		tv_static = new FlxSprite(0, 0, AssetPaths.tvstatic__png);
 		tv_static.scrollFactor.set();
+		positions = [];
 		
 		var mid_width = tv_static.width / 2.0;
 		var mid_height = tv_static.height / 2.0;
-		positions = [
-			FlxPoint.get(0, 0),
-			FlxPoint.get(-mid_width, 0),
-			FlxPoint.get(0, -mid_height),
-			FlxPoint.get(-mid_width, -mid_height),
-		];
+		for (i in 0...16)
+		{
+			positions.push(
+				FlxPoint.get(
+					-Math.random() * mid_width,
+					-Math.random() * mid_height
+				)
+			);
+		}
 		current_index = 0;
 		
 		set_tvstatic_position();
