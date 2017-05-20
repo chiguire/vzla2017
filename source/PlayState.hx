@@ -49,6 +49,7 @@ class PlayState extends FlxState
 	var messageStack : GenericStack<AbstractIterator<GameActionE>>;
 	var blockingTimers : Array<FlxTimer>;
 	var blockingTweens : Array<FlxTween>;
+	var updateFunctions : Array<Float->Void>;
 	
 	var GAME_KEYBOARD_INPUTS : GameKeyboardInputs = {
 		pause: [FlxKey.P, FlxKey.ESCAPE],
@@ -105,6 +106,7 @@ class PlayState extends FlxState
 		inputQueue = [];
 		blockingTimers = [];
 		blockingTweens = [];
+		updateFunctions = [];
 		messageStack = new GenericStack();
 		messageStack.add(new AbstractIterator(scenario.timeline()));
 		
@@ -119,6 +121,12 @@ class PlayState extends FlxState
 		while (inputQueue.length > 0)
 		{
 			inputActions.push(inputQueue.pop());
+		}
+		switch (gameState.state)
+		{
+		case CONTROL_AVATAR(_, _, _):
+			Lambda.foreach(updateFunctions, function (f) { f(elapsed); return true; });
+		default: // noop
 		}
 		updateGameState(inputActions);
 		updateRender();
@@ -269,8 +277,13 @@ class PlayState extends FlxState
 				moveCameraToPosition(sprite.x, sprite.y, anchor, false);
 				
 			case MOVE_CAMERA_TO_SPRITE_TWEENED(sprite, anchor, time):
-				
 				moveCameraToPosition(sprite.x, sprite.y, anchor, true, time);
+
+			case START_UPDATE_FUNCTION(fn):
+				updateFunctions.push(fn);
+				
+			case STOP_UPDATE_FUNCTION(fn):
+				updateFunctions.remove(fn);
 				
 			case FOLLOW_CAMERA(entity):
 				camera.follow(entity);

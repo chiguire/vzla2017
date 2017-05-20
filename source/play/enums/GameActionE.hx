@@ -20,6 +20,9 @@ enum GameActionE
 	MOVE_CAMERA_TO_SPRITE_DIRECT(sprite:FlxObject, anchor:AnchorE);
 	MOVE_CAMERA_TO_SPRITE_TWEENED(sprite:FlxObject, anchor:AnchorE, time:Float);
 	
+	START_UPDATE_FUNCTION(f : Float->Void);
+	STOP_UPDATE_FUNCTION(f : Float->Void);
+	
 	FOLLOW_CAMERA(?entity:FlxSprite);
 	DELAY_SECONDS(time:Float);
 	SEQUENCE(seq:Array<GameActionE>);

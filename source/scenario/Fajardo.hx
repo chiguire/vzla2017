@@ -7,6 +7,7 @@ import flixel.group.FlxSpriteGroup;
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
+import flixel.math.FlxVelocity;
 import flixel.util.FlxColor;
 import flixel.util.FlxSort;
 import play.Barrera;
@@ -206,8 +207,8 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 			state : CUTSCENE,
 			curtain_alpha : 1.0,
 			tv_static_active : false,
-			camera_position: FlxPoint.get(hw.x + hw.width / 2.0 - FlxG.width / 2.0, worldBounds().height - FlxG.height),
-			//camera_position: FlxPoint.get(diputado.x - FlxG.width / 2.0, diputado.y - FlxG.height / 2.0),
+			//camera_position: FlxPoint.get(hw.x + hw.width / 2.0 - FlxG.width / 2.0, worldBounds().height - FlxG.height),
+			camera_position: FlxPoint.get(diputado.x - FlxG.width / 2.0, diputado.y - FlxG.height / 2.0),
 		};
 	}
 	
@@ -216,15 +217,22 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 		return [
 			CURTAIN_FADE_IN(0.5),
 			DISPLAY_TVSTATIC(0.75),
-			DELAY_SECONDS(2),
+			DELAY_SECONDS(1),
 			//MOVE_CAMERA_TO_POSITION(FlxPoint.get(300, 300), true),
 			MOVE_CAMERA_TO_SPRITE_TWEENED(diputado, CENTER, 1.0),
 			GO_TO_GAME_STATE(CONTROL_AVATAR(diputado, null, null)),
+			START_UPDATE_FUNCTION(move_guardia),
 			DELAY_SECONDS(10),
+			STOP_UPDATE_FUNCTION(move_guardia),
 			GO_TO_GAME_STATE(CUTSCENE),
 			ANNOUNCE_NEWS(PortraitE.PORTRAIT_NR, "Nestor Reverol", "Aqui hay juerza"),
 			DELAY_SECONDS(NewsScreen.total_news_time()),
 			GO_TO_GAME_STATE(CONTROL_AVATAR(diputado, null, null)),
 		].iterator();
+	}
+	
+	private function move_guardia(elapsed:Float)
+	{
+		FlxVelocity.moveTowardsObject(guardia[0], marcha[0], 2, 3000);
 	}
 }
