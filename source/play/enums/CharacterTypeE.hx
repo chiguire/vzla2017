@@ -5,5 +5,5 @@ package play.enums;
  */
 enum CharacterTypeE 
 {
-	PRS;GNB;
+	PRS; GNB; DIP;
 }

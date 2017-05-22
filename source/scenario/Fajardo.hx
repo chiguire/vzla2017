@@ -2,9 +2,11 @@ package scenario;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxZSprite;
+import flixel.effects.FlxFlicker;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.FlxSprite;
+import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.math.FlxVelocity;
@@ -38,18 +40,23 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 	var border_bottom : FlxSprite;
 	var border_right : FlxSprite;
 	var border_left : FlxSprite;
+	var borders : FlxSpriteGroup;
 	
 	var fg : FlxSpriteGroup;
 	var entities : FlxSpriteGroup;
 	
 	var diputado: Character;
-	var marcha : Array<Character>;
-	var guardia : Array<Character>;
+	var marcha : FlxTypedGroup<Character>;
+	var guardia : FlxTypedGroup<Character>;
+	var un_guardia : Character;
 	var barrera1 : Barrera;
 	var barrera2 : Barrera;
+	var vehiculos : FlxTypedGroup<Barrera>;
 	
 	var goal : FlxZSprite;
 	var lose : FlxZSprite;
+	
+	var flecha : FlxSprite;
 	
 	public function new() 
 	{
@@ -69,7 +76,7 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 		border_top.makeGraphic(Std.int(hw.width) + 20, 10, FlxColor.TRANSPARENT);
 		border_top.immovable = true;
 		
-		border_bottom = new FlxSprite(hw.x - 10, hw.height - 40);
+		border_bottom = new FlxSprite(hw.x - 10, hw.height - 10);
 		border_bottom.makeGraphic(Std.int(hw.width) + 20, 10, FlxColor.TRANSPARENT);
 		border_bottom.immovable = true;
 		
@@ -81,10 +88,16 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 		border_right.makeGraphic(10, Std.int(hw.height), FlxColor.TRANSPARENT);
 		border_right.immovable = true;
 		
-		var marcha_centro = FlxPoint.get(hw.x + (hw.width / 2.0), worldBounds().height / 4.0);
+		borders = new FlxSpriteGroup();
+		borders.add(border_top);
+		borders.add(border_bottom);
+		borders.add(border_left);
+		borders.add(border_right);
 		
-		diputado = new Character(marcha_centro.x, marcha_centro.y, PRS, FlxColor.ORANGE);
-		marcha = [];
+		var marcha_centro = FlxPoint.get(hw.x + (hw.width / 2.0), world_bounds().height / 4.0);
+		
+		diputado = new Character(marcha_centro.x, marcha_centro.y, DIP, FlxColor.ORANGE);
+		marcha = new FlxTypedGroup<Character>();
 		for (i in 0...MARCHA_SIZE)
 		{
 			var min_x = (marcha_centro.x - (0.8 * hw.width / 2.0));
@@ -119,14 +132,14 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 				};
 				
 			var color = FlxColor.fromHSB(hue, saturation, brightness, 1);
-			marcha.push(new Character(x, y, PRS, color));
+			marcha.add(new Character(x, y, PRS, color));
 		}
 		
-		guardia = [];
+		guardia = new FlxTypedGroup<Character>();
 		for (i in 0...GUARDIA_SIZE)
 		{
-			guardia.push(new Character(
-				hw.x + 10 + ((hw.width - 20) * i / GUARDIA_SIZE), 
+			guardia.add(new Character(
+				hw.x + 30 + ((hw.width - 60) * i / GUARDIA_SIZE), 
 				FlxG.height / 2 - 30, 
 				GNB, 
 				FlxColor.GREEN)
@@ -134,6 +147,13 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 		}
 		barrera1 = new Barrera(hw.x + 30, 40);
 		barrera2 = new Barrera(hw.x + 170, 40);
+		vehiculos = new FlxTypedGroup<Barrera>();
+		vehiculos.add(barrera1);
+		vehiculos.add(barrera2);
+		
+		flecha = new FlxSprite(0, 0, AssetPaths.pointer_down__png);
+		flecha.color = FlxColor.ORANGE;
+		flecha.visible = false;
 		
 		//goal = new FlxZSprite(hw.x + 160, FlxG.height / 2 + 300, 35);
 		//goal.makeGraphic(35, 35, FlxColor.RED);
@@ -146,15 +166,12 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 		fg = new FlxSpriteGroup();
 		entities = new FlxSpriteGroup();
 		
-		fg.add(border_top);
-		fg.add(border_bottom);
-		fg.add(border_left);
-		fg.add(border_right);
+		fg.add(borders);
 		fg.add(entities);
 		
-		for (m in marcha) { entities.add(m); m.protest(); }
+		marcha.forEach(function(m) { entities.add(m); m.protest(); });
 		entities.add(diputado);
-		for (g in guardia) { entities.add(g); }
+		guardia.forEach(function(g) { entities.add(g); });
 		entities.add(barrera1);
 		entities.add(barrera2);
 		//entities.add(goal);
@@ -165,11 +182,17 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 		add(guaire2);
 		add(hw);
 		add(fg);
+		add(flecha);
 	}
 	
-	public inline function worldBounds() : FlxRect
+	public function world_bounds() : FlxRect
 	{
 		return new FlxRect(0, 0, 1024, 1024);
+	}
+	
+	public function camera_bounds() : FlxRect
+	{
+		return new FlxRect(100, 100, 1024 - 200, 1024 - 200);
 	}
 	
 	override public function update(elapsed:Float):Void 
@@ -181,8 +204,26 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 			guaire.y -= 1024;
 			guaire2.y -= 1024;
 		}
-		FlxG.collide(fg);
+		FlxG.collide(guardia, marcha);
+		FlxG.collide(diputado, guardia, separate_if_dragging);
+		FlxG.collide(guardia, borders);
+		FlxG.collide(marcha, borders);
+		FlxG.collide(diputado, borders);
+		FlxG.collide(guardia, vehiculos);
+		FlxG.collide(marcha, vehiculos);
+		FlxG.collide(diputado, vehiculos);
 		entities.sort(FlxZSprite.byZ, FlxSort.ASCENDING);
+		
+		if (flecha.visible)
+		{
+			flecha.x = main_character().x + main_character().width/2.0 - flecha.width/2.0;
+			flecha.y = main_character().y - 60;
+		}
+		
+		if (un_guardia != null && Type.enumEq(un_guardia.state, OUT))
+		{
+			un_guardia = null;
+		}
 	}
 	
 	public function main_character() : FlxSprite
@@ -222,17 +263,76 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 			MOVE_CAMERA_TO_SPRITE_TWEENED(diputado, CENTER, 1.0),
 			GO_TO_GAME_STATE(CONTROL_AVATAR(diputado, null, null)),
 			START_UPDATE_FUNCTION(move_guardia),
-			DELAY_SECONDS(10),
+			DELAY_SECONDS(8),
 			STOP_UPDATE_FUNCTION(move_guardia),
 			GO_TO_GAME_STATE(CUTSCENE),
 			ANNOUNCE_NEWS(PortraitE.PORTRAIT_NR, "Nestor Reverol", "Aqui hay juerza"),
 			DELAY_SECONDS(NewsScreen.total_news_time()),
 			GO_TO_GAME_STATE(CONTROL_AVATAR(diputado, null, null)),
+			START_UPDATE_FUNCTION(move_guardia),
+			DELAY_SECONDS(8),
+			STOP_UPDATE_FUNCTION(move_guardia),
+			ANNOUNCE_NEWS(PortraitE.PORTRAIT_MP, "Nestor Reverol", "Los muros van a caer"),
 		].iterator();
 	}
 	
 	private function move_guardia(elapsed:Float)
 	{
-		FlxVelocity.moveTowardsObject(guardia[0], marcha[0], 2, 3000);
+		if (un_guardia == null)
+		{
+			un_guardia = guardia.getRandom();
+		}
+		
+		if (Type.enumEq(un_guardia.state, IDLE))
+		{
+			var distancias = [];
+			for (m in marcha.iterator())
+			{
+				distancias.push({ dist:FlxMath.distanceBetween(m, un_guardia), spr: m});
+			}
+			var min_distancia = distancias[0];
+			for (dst in distancias)
+			{
+				if (dst.dist < min_distancia.dist)
+				{
+					min_distancia = dst;
+				}
+			}
+			un_guardia.state = CHASING(min_distancia.spr, 100);
+		}
+	}
+	
+	private function separate_if_dragging(a:Dynamic, b:Dynamic) : Void
+	{
+		var a_c = cast(a, Character);
+		var b_c = cast(b, Character);
+		
+		var dip = if (Type.enumEq(a_c.char_type, DIP)) a_c else b_c;
+		var gnb = if (Type.enumEq(a_c.char_type, GNB)) a_c else b_c;
+		
+		switch (gnb.state)
+		{
+		case DRAGGING(sprite):
+			var old_gnb_velocity = FlxPoint.get(gnb.velocity.x, gnb.velocity.y);
+			gnb.state = FLEEING;
+			gnb.velocity.x = old_gnb_velocity.x*3;
+			gnb.velocity.y = old_gnb_velocity.y*3;
+			
+			dip.velocity.x = -old_gnb_velocity.x*3;
+			dip.velocity.y = -old_gnb_velocity.y*3;
+			
+			var prs = sprite;
+			prs.state = RESCUED;
+			prs.velocity.x = 0;
+			prs.velocity.y = 150;
+		default:
+		}
+		
+	}
+	
+	public function point_to_character(spr:FlxSprite)
+	{
+		flecha.visible = true;
+		FlxFlicker.flicker(flecha, 2, 0.04, false);
 	}
 }

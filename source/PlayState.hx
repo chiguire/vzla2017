@@ -87,20 +87,21 @@ class PlayState extends FlxState
 		//add(virtual_pad);
 		add(stateDebugText);
 
-		var scenarioBounds = scenario.worldBounds();
+		var cameraBounds = scenario.camera_bounds();
 		
-		camera.minScrollX = scenarioBounds.left;
-		camera.maxScrollX = scenarioBounds.right;
-		camera.minScrollY = scenarioBounds.top;
-		camera.maxScrollY = scenarioBounds.bottom;
+		camera.minScrollX = cameraBounds.left;
+		camera.maxScrollX = cameraBounds.right;
+		camera.minScrollY = cameraBounds.top;
+		camera.maxScrollY = cameraBounds.bottom;
 		camera.scroll.set(gameState.camera_position.x, gameState.camera_position.y);
-		
+
+		var scenarioBounds = scenario.world_bounds();
 		//FlxG.log.error("right: "+ scenarioBounds.right + ". bottom: "+scenarioBounds.bottom);
 		FlxG.worldBounds.set(
-			scenarioBounds.left   - 100, 
-			scenarioBounds.top    - 100, 
-			scenarioBounds.right  + 100,
-			scenarioBounds.bottom + 100
+			scenarioBounds.left   - 1000, 
+			scenarioBounds.top    - 1000, 
+			scenarioBounds.right  + 1000,
+			scenarioBounds.bottom + 1000
 		);
 		
 		inputQueue = [];
@@ -528,6 +529,7 @@ class PlayState extends FlxState
 		switch (newState)
 		{
 			case CONTROL_AVATAR(character, winning_condition, losing_condition):
+				scenario.point_to_character(character);
 				camera.follow(character);
 			case CUTSCENE:
 				camera.follow(null);
