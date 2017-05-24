@@ -66,7 +66,7 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 		bg.scrollFactor.set(0.8, 0.8);
 		
 		guaire = new FlxSprite(59, 0, AssetPaths.river__png);
-		guaire2 = new FlxSprite(59, -guaire.height-0.5, AssetPaths.river__png);
+		guaire2 = new FlxSprite(59, -guaire.height+0.5, AssetPaths.river__png);
 		guaire.velocity.y = 100;
 		guaire2.velocity.y = 100;
 		
@@ -272,7 +272,7 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 			START_UPDATE_FUNCTION(move_guardia),
 			DELAY_SECONDS(8),
 			STOP_UPDATE_FUNCTION(move_guardia),
-			ANNOUNCE_NEWS(PortraitE.PORTRAIT_MP, "Nestor Reverol", "Los muros van a caer"),
+			ANNOUNCE_NEWS(PortraitE.PORTRAIT_MP, "Miguel Pizarro", "Los muros van a caer"),
 		].iterator();
 	}
 	

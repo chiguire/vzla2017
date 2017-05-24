@@ -79,7 +79,8 @@ class Character extends FlxZSprite
 			animation.add(WALK_UPDOWN, [1,2,1,0,3,4,3,0], 30);
 			animation.add(IDLE_LEFTRIGHT, [0], 30, true);
 			animation.add(WALK_LEFT, [1,2,1,0,3,4,3,0], 30, true);
-			animation.add(WALK_RIGHT, [1,2,1,0,3,4,3,0], 30, true);
+			animation.add(WALK_RIGHT, [1, 2, 1, 0, 3, 4, 3, 0], 30, true);
+			mass = 10000;
 		}
 		
 		animation.play(IDLE_UPDOWN);

@@ -1,11 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <strings>
+  <file path="source/CreditsState.hx">
+    <t id="Graphics: Ciro Durán, Evil Tomato">Graphics: Ciro Durán, Evil Tomato</t><!--line 24-->
+    <t id="Press any key to return to menu">Press any key to return to menu</t><!--line 30-->
+    <t id="Programming: Ciro Durán">Programming: Ciro Durán</t><!--line 21-->
+    <t id="Writing: César Sánchez">Writing: César Sánchez</t><!--line 27-->
+  </file>
+  <file path="source/MenuState.hx">
+    <t id="CAMBIAR A ESPAÑOL">CAMBIAR A ESPAÑOL</t><!--line 149-->
+    <t id="CONTROL: HIDDEN">CONTROL: HIDDEN</t><!--line 143-->
+    <t id="CONTROL: SHOWN">CONTROL: SHOWN</t><!--line 139-->
+    <t id="CREDITS">CREDITS</t><!--line 50-->
+    <t id="SOUND: OFF">SOUND: OFF</t><!--line 131-->
+    <t id="SOUND: ON">SOUND: ON</t><!--line 127-->
+    <t id="START">START</t><!--line 46-->
+  </file>
   <file path="source/screen/PauseScreen.hx">
     <t id="CONTROL: HIDDEN">CONTROL: HIDDEN</t><!--line 137-->
     <t id="CONTROL: SHOWN">CONTROL: SHOWN</t><!--line 133-->
-    <t id="RESTART GAME">RESTART GAME</t><!--line 43-->
-    <t id="RETURN TO GAME">RETURN TO GAME</t><!--line 42-->
-    <t id="RETURN TO MENU">RETURN TO MENU</t><!--line 46-->
+    <t id="RESTART GAME">RESTART GAME</t><!--line 42-->
+    <t id="RETURN TO GAME">RETURN TO GAME</t><!--line 41-->
+    <t id="RETURN TO MENU">RETURN TO MENU</t><!--line 45-->
     <t id="SOUND: OFF">SOUND: OFF</t><!--line 125-->
     <t id="SOUND: ON">SOUND: ON</t><!--line 121-->
   </file>

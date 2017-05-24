@@ -1,6 +1,5 @@
 package screen;
 
-import flash.errors.Error;
 import flixel.FlxG;
 import flixel.group.FlxSpriteGroup;
 import flixel.text.FlxText;
@@ -99,9 +98,10 @@ class PauseScreen extends FlxSpriteGroup
 			//	control_text.text = control_txt();
 			//	return NONE;
 			case 3:
-				return GO_TO_FLIXEL_STATE(PlayState); // MenuState when done
+				return GO_TO_FLIXEL_STATE(MenuState); // MenuState when done
+			default:
+				throw "Invalid index selected";
 		}
-		throw new Error("Invalid index selected");
 	}
 	
 	public override function update(elapsed:Float)

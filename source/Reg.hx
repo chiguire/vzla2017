@@ -1,4 +1,6 @@
 package;
+import play.GameKeyboardInputs;
+import flixel.input.keyboard.FlxKey;
 
 /**
  * ...
@@ -6,9 +8,19 @@ package;
  */
 class Reg
 {
-	public static var locale : String = "default";
+	public static var locale : String = "en";
 	
 	public static var sound_on : Bool = true;
 	
 	public static var virtualpad_visible : Bool = true;
+	
+	public static var GAME_KEYBOARD_INPUTS : GameKeyboardInputs = {
+		pause: [FlxKey.P, FlxKey.ESCAPE],
+		up:    [FlxKey.UP, FlxKey.W],
+		down:  [FlxKey.DOWN, FlxKey.S],
+		left:  [FlxKey.LEFT, FlxKey.A],
+		right: [FlxKey.RIGHT, FlxKey.D],
+		a:     [FlxKey.ONE, FlxKey.ENTER],
+		b:     [FlxKey.TWO, FlxKey.SHIFT],
+	};
 }

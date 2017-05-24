@@ -51,19 +51,11 @@ class PlayState extends FlxState
 	var blockingTweens : Array<FlxTween>;
 	var updateFunctions : Array<Float->Void>;
 	
-	var GAME_KEYBOARD_INPUTS : GameKeyboardInputs = {
-		pause: [FlxKey.P, FlxKey.ESCAPE],
-		up:    [FlxKey.UP, FlxKey.W],
-		down:  [FlxKey.DOWN, FlxKey.S],
-		left:  [FlxKey.LEFT, FlxKey.A],
-		right: [FlxKey.RIGHT, FlxKey.D],
-		a:     [FlxKey.ONE, FlxKey.ENTER],
-		b:     [FlxKey.TWO, FlxKey.SHIFT],
-	};
-	
 	override public function create():Void
 	{
 		super.create();
+		FlxG.mouse.visible = false;
+		//FlxG.autoPause = false;
 		
 		scenario = new Fajardo();
 		gameState = scenario.starting_state();
@@ -401,20 +393,20 @@ class PlayState extends FlxState
 	{
 		if (gameState.paused)
 		{
-			if (FlxG.keys.anyJustPressed(GAME_KEYBOARD_INPUTS.up))
+			if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.up))
 			{
 				return [MOVE_CURSOR(UP)];
 				
 			}
-			else if (FlxG.keys.anyJustPressed(GAME_KEYBOARD_INPUTS.down))
+			else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.down))
 			{
 				return [MOVE_CURSOR(DOWN)];
 			}
-			else if (FlxG.keys.anyJustPressed(GAME_KEYBOARD_INPUTS.a))
+			else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.a))
 			{
 				return [pause_screen.get_action()];
 			}
-			else if (FlxG.keys.anyJustPressed(GAME_KEYBOARD_INPUTS.pause))
+			else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.pause))
 			{
 				return [PAUSE];
 			}
@@ -439,7 +431,7 @@ class PlayState extends FlxState
 		var result = [];
 		
 		// pause
-		if (FlxG.keys.anyJustPressed(GAME_KEYBOARD_INPUTS.pause))
+		if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.pause))
 		{
 			result.push(GameActionE.PAUSE);
 		}
@@ -460,10 +452,10 @@ class PlayState extends FlxState
 			if (DEBUG_MOVE_CAMERA)
 			{
 				// move camera
-				var up    = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.up);
-				var down  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.down);
-				var left  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.left);
-				var right = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.right);
+				var up    = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.up);
+				var down  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.down);
+				var left  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.left);
+				var right = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.right);
 				if (up && left)
 				{
 					result.push(GameActionE.MOVE_CAMERA(DirectionE.UPLEFT));
@@ -505,10 +497,10 @@ class PlayState extends FlxState
 	private function moveCharacterActions() : Array<GameActionE>
 	{
 		// move character
-		var up    = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.up);
-		var down  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.down);
-		var left  = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.left);
-		var right = FlxG.keys.anyPressed(GAME_KEYBOARD_INPUTS.right);
+		var up    = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.up);
+		var down  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.down);
+		var left  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.left);
+		var right = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.right);
 		var character = scenario.main_character();
 		return [GameActionE.MOVE_SPRITE_DIRECTION(
 			character, 
@@ -538,10 +530,12 @@ class PlayState extends FlxState
 	
 	private function pauseToggle()
 	{
-		var newPauseState = !gameState.paused;
-		gameState.paused = newPauseState;
-		pause_screen.visible = !newPauseState;
-		scenario.active = newPauseState;
+		var newPauseState    = !gameState.paused;
+		gameState.paused     = newPauseState;
+		pause_screen.visible = newPauseState;
+		scenario.active      = !newPauseState;
+		FlxTimer.globalManager.active = !newPauseState;
+		FlxTween.globalManager.active = !newPauseState;
 	}
 	
 	override public function onFocus():Void 
