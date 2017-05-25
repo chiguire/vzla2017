@@ -82,7 +82,7 @@ class Character extends FlxZSprite
 			animation.add(IDLE_LEFTRIGHT, [0], 30, true);
 			animation.add(WALK_LEFT, [1,2,1,0,3,4,3,0], 30, true);
 			animation.add(WALK_RIGHT, [1, 2, 1, 0, 3, 4, 3, 0], 30, true);
-			mass = 10000000;
+			mass = 300.0;
 		}
 		
 		animation.play(IDLE_UPDOWN);
@@ -91,6 +91,7 @@ class Character extends FlxZSprite
 		
 		state = IDLE;
 		bounds = new FlxRect(10, 33, 14, 4);
+		drag.set(1, 1);
 		offset.x = bounds.x;
 		offset.y = bounds.y;
 		width = bounds.width;
@@ -135,6 +136,7 @@ class Character extends FlxZSprite
 		
 		case DRAGGED(bySprite):
 			// check out of screen
+			setPosition(bySprite.x, bySprite.y + 5);
 			
 		case FLEEING:
 			velocity.y = -120;
@@ -178,15 +180,17 @@ class Character extends FlxZSprite
 		case DRAGGING(_):
 			velocity.set(FlxG.random.sign() * 60, -60);
 		case DRAGGED(bySprite):
+			velocity.set();
 			animation.play(TRAPPED, true);
-			velocity.set(bySprite.velocity.x, bySprite.velocity.y);
+			solid = false;
 			
 		case FLEEING:
-			
+			solid = true;
 			
 		case RESCUED:
 			
 		case OUT:
+			solid = true;
 			kill();
 		}
 		
