@@ -3,6 +3,7 @@ package;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.MyFlxVirtualPad;
 import flixel.input.keyboard.FlxKey;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
@@ -20,16 +21,18 @@ class MenuState extends FlxState
 	var return_text : FlxText;
 	var language_text : FlxText;
 	var sound_text : FlxText;
-	//var control_text : FlxText;
+	var control_text : FlxText;
 	var credits_text : FlxText;
 	
 	var selected_cursor : FlxSprite;
 	var selected_item : Int;
 	
-	private static inline var num_items : Int = 4;
+	private static inline var num_items : Int = 5;
 	private static inline var starting_y : Int = 50;
 	private static inline var spacing_y : Int = 20;
 	private static function order_item_y(ix:Int) { return starting_y + ix * spacing_y; }
+	
+	var virtual_pad : MyFlxVirtualPad;
 	
 	override public function create():Void
 	{
@@ -37,7 +40,7 @@ class MenuState extends FlxState
 		
 		I18n.init();
 		//FlxG.debugger.visible = true;
-		//FlxG.mouse.visible = false;
+		FlxG.mouse.visible = false;
 		FlxG.autoPause = false;
 		
 		pause_bg = new FlxSprite(0, 0);
@@ -46,19 +49,22 @@ class MenuState extends FlxState
 		return_text  = new FlxText(60.5, order_item_y(0), FlxG.width - 60, "START".i18n());
 		language_text = new FlxText(60.5, order_item_y(1), FlxG.width - 60, language_txt());
 		sound_text   = new FlxText(60.5, order_item_y(2), FlxG.width - 60, sound_txt());
-		//control_text = new FlxText(60.5, order_item_y(3), FlxG.width - 60, control_txt());
-		credits_text    = new FlxText(60.5, order_item_y(3), FlxG.width - 60, "CREDITS".i18n());
+		control_text = new FlxText(60.5, order_item_y(3), FlxG.width - 60, control_txt());
+		credits_text    = new FlxText(60.5, order_item_y(4), FlxG.width - 60, "CREDITS".i18n());
 		
 		selected_cursor = new FlxSprite(30, 30);
 		selected_cursor.makeGraphic(12, 12, FlxColor.RED);
+		
+		virtual_pad = new MyFlxVirtualPad(FlxDPadMode.FULL, FlxActionMode.A_B);
 		
 		add(pause_bg);
 		add(return_text);
 		add(language_text);
 		add(sound_text);
-		//add(control_text);
+		add(control_text);
 		add(credits_text);
 		add(selected_cursor);
+		add(virtual_pad);
 		
 		selected_item = 0;
 	}
@@ -67,22 +73,27 @@ class MenuState extends FlxState
 	{
 		super.update(elapsed);
 		
-		if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.up))
+		if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.up) ||
+			virtual_pad.buttonUp.justReleased)
 		{
 			go_up();
 		}
-		else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.down))
+		else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.down) ||
+			virtual_pad.buttonDown.justReleased)
 		{
 			go_down();
 		}
 		else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.a) ||
-			FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.b))
+			FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.b) ||
+			virtual_pad.buttonA.justReleased ||
+			virtual_pad.buttonB.justReleased)
 		{
 			execute_action();
 		}
 		
 		selected_cursor.setPosition(30, order_item_y(selected_item));
-		
+		virtual_pad.visible = Reg.virtualpad_visible;
+		virtual_pad.active = Reg.virtualpad_visible;
 	}
 	
 	public function go_down() : Void
@@ -109,11 +120,10 @@ class MenuState extends FlxState
 				Reg.sound_on = !Reg.sound_on;
 				sound_text.text = sound_txt();
 				
-			//case 3:
-			//	Reg.virtualpad_visible = !Reg.virtualpad_visible;
-			//	control_text.text = control_txt();
-			//	return NONE;
 			case 3:
+				Reg.virtualpad_visible = !Reg.virtualpad_visible;
+				control_text.text = control_txt();
+			case 4:
 				FlxG.switchState(new CreditsState());
 			default:
 				throw "Invalid index selected";

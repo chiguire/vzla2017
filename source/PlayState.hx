@@ -56,7 +56,7 @@ class PlayState extends FlxState
 	override public function create():Void
 	{
 		super.create();
-		//FlxG.mouse.visible = false;
+		FlxG.mouse.visible = false;
 		//FlxG.autoPause = false;
 		
 		virtual_pad = new MyFlxVirtualPad(FlxDPadMode.FULL, FlxActionMode.A_B);
@@ -108,6 +108,8 @@ class PlayState extends FlxState
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
+		virtual_pad.visible = Reg.virtualpad_visible;
+		virtual_pad.active = Reg.virtualpad_visible;
 		updateTimers();
 		var inputActions = getGameActions();
 		while (inputQueue.length > 0)
@@ -155,7 +157,7 @@ class PlayState extends FlxState
 	
 	private function updateGameState(gameActions:Array<GameActionE>) : Void
 	{
-		virtual_pad.releaseAll();
+		//virtual_pad.releaseAll();
 		if (gameState.paused)
 		{
 			Lambda.foreach(gameActions, function (ga)
@@ -393,23 +395,26 @@ class PlayState extends FlxState
 	{
 		if (gameState.paused)
 		{
-			if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.up))
+			if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.up) ||
+				virtual_pad.buttonUp.justReleased)
 			{
-				virtual_pad.buttonUp.status = FlxButton.PRESSED;
+				//virtual_pad.buttonUp.status = FlxButton.PRESSED;
 				return [MOVE_CURSOR(UP)];
-				
 			}
-			else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.down))
+			else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.down) ||
+				virtual_pad.buttonDown.justReleased)
 			{
-				virtual_pad.buttonDown.status = FlxButton.PRESSED;
+				//virtual_pad.buttonDown.status = FlxButton.PRESSED;
 				return [MOVE_CURSOR(DOWN)];
 			}
-			else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.a))
+			else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.a) ||
+				virtual_pad.buttonA.justReleased)
 			{
-				virtual_pad.buttonA.status = FlxButton.PRESSED;
+				//virtual_pad.buttonA.status = FlxButton.PRESSED;
 				return [pause_screen.get_action()];
 			}
-			else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.pause))
+			else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.pause) ||
+				virtual_pad.buttonB.justReleased)
 			{
 				return [PAUSE];
 			}
@@ -434,7 +439,8 @@ class PlayState extends FlxState
 		var result = [];
 		
 		// pause
-		if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.pause))
+		if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.pause) ||
+			virtual_pad.buttonB.justReleased)
 		{
 			result.push(GameActionE.PAUSE);
 		}
@@ -455,15 +461,19 @@ class PlayState extends FlxState
 			if (DEBUG_MOVE_CAMERA)
 			{
 				// move camera
-				var up    = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.up);
-				var down  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.down);
-				var left  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.left);
-				var right = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.right);
+				var up    = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.up) ||
+					virtual_pad.buttonUp.pressed;
+				var down  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.down) ||
+					virtual_pad.buttonDown.pressed;
+				var left  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.left) ||
+					virtual_pad.buttonLeft.pressed;
+				var right = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.right) ||
+					virtual_pad.buttonRight.pressed;
 				
-				if (up) { virtual_pad.buttonUp.status = FlxButton.PRESSED; }
-				if (down) { virtual_pad.buttonDown.status = FlxButton.PRESSED; }
-				if (left) { virtual_pad.buttonLeft.status = FlxButton.PRESSED; }
-				if (right) { virtual_pad.buttonRight.status = FlxButton.PRESSED; }
+				//if (up) { virtual_pad.buttonUp.status = FlxButton.PRESSED; }
+				//if (down) { virtual_pad.buttonDown.status = FlxButton.PRESSED; }
+				//if (left) { virtual_pad.buttonLeft.status = FlxButton.PRESSED; }
+				//if (right) { virtual_pad.buttonRight.status = FlxButton.PRESSED; }
 				
 				if (up && left)
 				{
@@ -506,16 +516,20 @@ class PlayState extends FlxState
 	private function moveCharacterActions() : Array<GameActionE>
 	{
 		// move character
-		var up    = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.up);
-		var down  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.down);
-		var left  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.left);
-		var right = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.right);
+		var up    = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.up) ||
+			virtual_pad.buttonUp.pressed;
+		var down  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.down) ||
+			virtual_pad.buttonDown.pressed;
+		var left  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.left) ||
+			virtual_pad.buttonLeft.pressed;
+		var right = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.right) ||
+			virtual_pad.buttonRight.pressed;
 		var character = scenario.main_character();
 		
-		if (up) { virtual_pad.buttonUp.status = FlxButton.PRESSED; }
-		if (down) { virtual_pad.buttonDown.status = FlxButton.PRESSED; }
-		if (left) { virtual_pad.buttonLeft.status = FlxButton.PRESSED; }
-		if (right) { virtual_pad.buttonRight.status = FlxButton.PRESSED; }
+		//if (up) { virtual_pad.buttonUp.status = FlxButton.PRESSED; }
+		//if (down) { virtual_pad.buttonDown.status = FlxButton.PRESSED; }
+		//if (left) { virtual_pad.buttonLeft.status = FlxButton.PRESSED; }
+		//if (right) { virtual_pad.buttonRight.status = FlxButton.PRESSED; }
 		
 		return [GameActionE.MOVE_SPRITE_DIRECTION(
 			character, 

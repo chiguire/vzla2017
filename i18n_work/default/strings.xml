@@ -7,13 +7,13 @@
     <t id="WRITING: César Sánchez">WRITING: César Sánchez</t><!--line 27-->
   </file>
   <file path="source/MenuState.hx">
-    <t id="CAMBIAR A ESPAÑOL">CAMBIAR A ESPAÑOL</t><!--line 149-->
-    <t id="CONTROL: HIDDEN">CONTROL: HIDDEN</t><!--line 143-->
-    <t id="CONTROL: SHOWN">CONTROL: SHOWN</t><!--line 139-->
-    <t id="CREDITS">CREDITS</t><!--line 50-->
-    <t id="SOUND: OFF">SOUND: OFF</t><!--line 131-->
-    <t id="SOUND: ON">SOUND: ON</t><!--line 127-->
-    <t id="START">START</t><!--line 46-->
+    <t id="CAMBIAR A ESPAÑOL">CAMBIAR A ESPAÑOL</t><!--line 159-->
+    <t id="CONTROL: HIDDEN">CONTROL: HIDDEN</t><!--line 153-->
+    <t id="CONTROL: SHOWN">CONTROL: SHOWN</t><!--line 149-->
+    <t id="CREDITS">CREDITS</t><!--line 53-->
+    <t id="SOUND: OFF">SOUND: OFF</t><!--line 141-->
+    <t id="SOUND: ON">SOUND: ON</t><!--line 137-->
+    <t id="START">START</t><!--line 49-->
   </file>
   <file path="source/screen/PauseScreen.hx">
     <t id="CONTROL: HIDDEN">CONTROL: HIDDEN</t><!--line 137-->

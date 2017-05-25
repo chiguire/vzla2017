@@ -19,13 +19,13 @@ class PauseScreen extends FlxSpriteGroup
 	var return_text : FlxText;
 	var restart_text : FlxText;
 	var sound_text : FlxText;
-	//var control_text : FlxText;
+	var control_text : FlxText;
 	var quit_text : FlxText;
 	
 	var selected_cursor : FlxSprite;
 	var selected_item : Int;
 	
-	private static inline var num_items : Int = 4;
+	private static inline var num_items : Int = 5;
 	private static inline var starting_y : Int = 50;
 	private static inline var spacing_y : Int = 20;
 	private static function order_item_y(ix:Int) { return starting_y + ix * spacing_y; }
@@ -41,8 +41,8 @@ class PauseScreen extends FlxSpriteGroup
 		return_text  = new FlxText(60.5, order_item_y(0), FlxG.width - 60, "RETURN TO GAME".i18n());
 		restart_text = new FlxText(60.5, order_item_y(1), FlxG.width - 60, "RESTART GAME".i18n());
 		sound_text   = new FlxText(60.5, order_item_y(2), FlxG.width - 60, sound_txt());
-		//control_text = new FlxText(60.5, order_item_y(3), FlxG.width - 60, control_txt());
-		quit_text    = new FlxText(60.5, order_item_y(3), FlxG.width - 60, "RETURN TO MENU".i18n());
+		control_text = new FlxText(60.5, order_item_y(3), FlxG.width - 60, control_txt());
+		quit_text    = new FlxText(60.5, order_item_y(4), FlxG.width - 60, "RETURN TO MENU".i18n());
 		
 		selected_cursor = new FlxSprite(30, 30);
 		selected_cursor.makeGraphic(12, 12, FlxColor.RED);
@@ -51,7 +51,7 @@ class PauseScreen extends FlxSpriteGroup
 		add(return_text);
 		add(restart_text);
 		add(sound_text);
-		//add(control_text);
+		add(control_text);
 		add(quit_text);
 		add(selected_cursor);
 		
@@ -93,11 +93,11 @@ class PauseScreen extends FlxSpriteGroup
 				Reg.sound_on = !Reg.sound_on;
 				sound_text.text = sound_txt();
 				return NONE;
-			//case 3:
-			//	Reg.virtualpad_visible = !Reg.virtualpad_visible;
-			//	control_text.text = control_txt();
-			//	return NONE;
 			case 3:
+				Reg.virtualpad_visible = !Reg.virtualpad_visible;
+				control_text.text = control_txt();
+				return NONE;
+			case 4:
 				return GO_TO_FLIXEL_STATE(MenuState); // MenuState when done
 			default:
 				throw "Invalid index selected";

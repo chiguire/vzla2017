@@ -65,6 +65,7 @@ class Character extends FlxZSprite
 			animation.add(TRAPPED, [3], 30, true);
 			animation.add(PROTEST, [11, 12, 13, 14, 15, 14, 13, 12], 30, true);
 			animation.add(PICKUP, [16, 16, 13, 12, 11], 30, true);
+			mass = 100.0;
 		case PRS:
 			animation.add(IDLE_UPDOWN, [0], 30, true);
 			animation.add(WALK_UPDOWN, [6, 7, 8, 9, 10], 30, true);
@@ -74,13 +75,14 @@ class Character extends FlxZSprite
 			animation.add(TRAPPED, [3], 30, true);
 			animation.add(PROTEST, [11, 12, 13, 14, 15, 14, 13, 12], 30, true);
 			animation.add(PICKUP, [16, 16, 13, 12, 11], 30, true);
+			mass = 100.0;
 		case GNB:
 			animation.add(IDLE_UPDOWN, [0], 30, true);
 			animation.add(WALK_UPDOWN, [1,2,1,0,3,4,3,0], 30);
 			animation.add(IDLE_LEFTRIGHT, [0], 30, true);
 			animation.add(WALK_LEFT, [1,2,1,0,3,4,3,0], 30, true);
 			animation.add(WALK_RIGHT, [1, 2, 1, 0, 3, 4, 3, 0], 30, true);
-			mass = 10000;
+			mass = 10000000;
 		}
 		
 		animation.play(IDLE_UPDOWN);
@@ -93,7 +95,6 @@ class Character extends FlxZSprite
 		offset.y = bounds.y;
 		width = bounds.width;
 		height = bounds.height;
-		mass = 100.0;
 		flx_bounds = new FlxObject(bounds.x, bounds.y, bounds.width, bounds.height);
 		flx_bounds.solid = false;
 		protesting = false;
