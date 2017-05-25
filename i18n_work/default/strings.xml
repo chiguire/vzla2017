@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <strings>
   <file path="source/CreditsState.hx">
-    <t id="Graphics: Ciro Durán, Evil Tomato">Graphics: Ciro Durán, Evil Tomato</t><!--line 24-->
+    <t id="GRAPHICS: Ciro Durán">GRAPHICS: Ciro Durán</t><!--line 24-->
+    <t id="PROGRAMMING: Ciro Durán">PROGRAMMING: Ciro Durán</t><!--line 21-->
     <t id="Press any key to return to menu">Press any key to return to menu</t><!--line 30-->
-    <t id="Programming: Ciro Durán">Programming: Ciro Durán</t><!--line 21-->
-    <t id="Writing: César Sánchez">Writing: César Sánchez</t><!--line 27-->
+    <t id="WRITING: César Sánchez">WRITING: César Sánchez</t><!--line 27-->
   </file>
   <file path="source/MenuState.hx">
     <t id="CAMBIAR A ESPAÑOL">CAMBIAR A ESPAÑOL</t><!--line 149-->

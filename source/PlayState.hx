@@ -10,6 +10,8 @@ import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxPoint;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
+import flixel.ui.FlxButton;
+import flixel.ui.FlxVirtualPad;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import haxe.ds.GenericStack;
@@ -18,7 +20,7 @@ import play.enums.AnchorE;
 import play.enums.PortraitE;
 import screen.CurtainScreen;
 import screen.TVStaticScreen;
-//import flixel.ui.FlxVirtualPad;
+import flixel.MyFlxVirtualPad;
 
 import play.GameKeyboardInputs;
 import play.GameState;
@@ -40,7 +42,7 @@ class PlayState extends FlxState
 	var news_screen : NewsScreen;
 	var static_screen : TVStaticScreen;
 	var curtain_screen : CurtainScreen;
-	//var virtual_pad : FlxVirtualPad;
+	var virtual_pad : MyFlxVirtualPad;
 	var gameState : GameState;
 	
 	var stateDebugText : FlxText;
@@ -54,19 +56,16 @@ class PlayState extends FlxState
 	override public function create():Void
 	{
 		super.create();
-		FlxG.mouse.visible = false;
+		//FlxG.mouse.visible = false;
 		//FlxG.autoPause = false;
 		
+		virtual_pad = new MyFlxVirtualPad(FlxDPadMode.FULL, FlxActionMode.A_B);
 		scenario = new Fajardo();
 		gameState = scenario.starting_state();
 		news_screen = new NewsScreen();
 		static_screen = new TVStaticScreen(gameState.tv_static_active);
 		curtain_screen = new CurtainScreen(gameState.curtain_alpha);
 		pause_screen = new PauseScreen(gameState.paused);
-		
-		//virtual_pad = new FlxVirtualPad(FlxDPadMode.FULL, FlxActionMode.A_B);
-		//virtual_pad.x = 5;
-		//virtual_pad.y = FlxG.height - 160;
 		
 		stateDebugText = new FlxText(5, FlxG.height - 15, FlxG.width - 10, "State:");
 		stateDebugText.scrollFactor.set();
@@ -76,7 +75,7 @@ class PlayState extends FlxState
 		add(static_screen);
 		add(curtain_screen);
 		add(pause_screen);
-		//add(virtual_pad);
+		add(virtual_pad);
 		add(stateDebugText);
 
 		var cameraBounds = scenario.camera_bounds();
@@ -156,6 +155,7 @@ class PlayState extends FlxState
 	
 	private function updateGameState(gameActions:Array<GameActionE>) : Void
 	{
+		virtual_pad.releaseAll();
 		if (gameState.paused)
 		{
 			Lambda.foreach(gameActions, function (ga)
@@ -395,15 +395,18 @@ class PlayState extends FlxState
 		{
 			if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.up))
 			{
+				virtual_pad.buttonUp.status = FlxButton.PRESSED;
 				return [MOVE_CURSOR(UP)];
 				
 			}
 			else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.down))
 			{
+				virtual_pad.buttonDown.status = FlxButton.PRESSED;
 				return [MOVE_CURSOR(DOWN)];
 			}
 			else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.a))
 			{
+				virtual_pad.buttonA.status = FlxButton.PRESSED;
 				return [pause_screen.get_action()];
 			}
 			else if (FlxG.keys.anyJustPressed(Reg.GAME_KEYBOARD_INPUTS.pause))
@@ -456,6 +459,12 @@ class PlayState extends FlxState
 				var down  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.down);
 				var left  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.left);
 				var right = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.right);
+				
+				if (up) { virtual_pad.buttonUp.status = FlxButton.PRESSED; }
+				if (down) { virtual_pad.buttonDown.status = FlxButton.PRESSED; }
+				if (left) { virtual_pad.buttonLeft.status = FlxButton.PRESSED; }
+				if (right) { virtual_pad.buttonRight.status = FlxButton.PRESSED; }
+				
 				if (up && left)
 				{
 					result.push(GameActionE.MOVE_CAMERA(DirectionE.UPLEFT));
@@ -502,6 +511,12 @@ class PlayState extends FlxState
 		var left  = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.left);
 		var right = FlxG.keys.anyPressed(Reg.GAME_KEYBOARD_INPUTS.right);
 		var character = scenario.main_character();
+		
+		if (up) { virtual_pad.buttonUp.status = FlxButton.PRESSED; }
+		if (down) { virtual_pad.buttonDown.status = FlxButton.PRESSED; }
+		if (left) { virtual_pad.buttonLeft.status = FlxButton.PRESSED; }
+		if (right) { virtual_pad.buttonRight.status = FlxButton.PRESSED; }
+		
 		return [GameActionE.MOVE_SPRITE_DIRECTION(
 			character, 
 			if (up && left) { DirectionE.UPLEFT; }

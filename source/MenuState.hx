@@ -37,7 +37,7 @@ class MenuState extends FlxState
 		
 		I18n.init();
 		//FlxG.debugger.visible = true;
-		FlxG.mouse.visible = false;
+		//FlxG.mouse.visible = false;
 		FlxG.autoPause = false;
 		
 		pause_bg = new FlxSprite(0, 0);

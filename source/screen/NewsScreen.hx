@@ -3,7 +3,6 @@ package screen;
 import flash.errors.Error;
 import flixel.FlxSprite;
 import flixel.FlxG;
-import flixel.addons.util.FlxFSM.StatePool;
 import flixel.group.FlxSpriteGroup;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
