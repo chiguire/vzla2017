@@ -27,20 +27,24 @@ class CreditsState extends FlxState
 		var writing_txt = new FlxText(10, 140, FlxG.width - 20, "WRITING: César Sánchez".i18n());
 		writing_txt.wordWrap = true;
 		writing_txt.alignment = FlxTextAlign.CENTER;
-		var press_txt = new FlxText(10, FlxG.height - 20, FlxG.width - 20, "Press any key to return to menu".i18n());
+		var title_txt = new FlxText(10, 160, FlxG.width - 20, "TITLE ART: Héctor Vargas".i18n());
+		title_txt.wordWrap = true;
+		title_txt.alignment = FlxTextAlign.CENTER;
+		var press_txt = new FlxText(10, FlxG.height - 20, FlxG.width - 20, "Press space to return to menu".i18n());
 		press_txt.wordWrap = true;
 		press_txt.alignment = FlxTextAlign.CENTER;
 		
 		add(programacion_txt);
 		add(graficos_txt);
 		add(writing_txt);
+		add(title_txt);
 		add(press_txt);
 	}
 	
 	public override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		if (FlxG.keys.anyJustPressed([FlxKey.SPACE]))
+		if (FlxG.keys.anyJustPressed([FlxKey.SPACE].concat(Reg.GAME_KEYBOARD_INPUTS.a).concat(Reg.GAME_KEYBOARD_INPUTS.b)))
 		{
 			FlxG.switchState(new MenuState());
 		}

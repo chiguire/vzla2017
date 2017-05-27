@@ -180,6 +180,7 @@ class Character extends FlxZSprite
 		case DRAGGING(_):
 			velocity.set(FlxG.random.sign() * 60, -60);
 		case DRAGGED(bySprite):
+			stop_protest();
 			velocity.set();
 			animation.play(TRAPPED, true);
 			solid = false;

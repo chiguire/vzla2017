@@ -21,6 +21,7 @@ import play.enums.GameStateE;
 import play.enums.GameActionE;
 import play.enums.PortraitE;
 import screen.NewsScreen;
+import screen.TitleScreen;
 
 /**
  * ...
@@ -248,8 +249,8 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 			state : CUTSCENE,
 			curtain_alpha : 1.0,
 			tv_static_active : false,
-			//camera_position: FlxPoint.get(hw.x + hw.width / 2.0 - FlxG.width / 2.0, worldBounds().height - FlxG.height),
-			camera_position: FlxPoint.get(diputado.x - FlxG.width / 2.0, diputado.y - FlxG.height / 2.0),
+			camera_position: FlxPoint.get(hw.x + hw.width / 2.0 - FlxG.width / 2.0, camera_bounds().height - FlxG.height),
+			//camera_position: FlxPoint.get(diputado.x - FlxG.width / 2.0, diputado.y - FlxG.height / 2.0),
 		};
 	}
 	
@@ -259,20 +260,44 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 			CURTAIN_FADE_IN(0.5),
 			DISPLAY_TVSTATIC(0.75),
 			DELAY_SECONDS(1),
-			//MOVE_CAMERA_TO_POSITION(FlxPoint.get(300, 300), true),
-			MOVE_CAMERA_TO_SPRITE_TWEENED(diputado, CENTER, 1.0),
+			ANNOUNCE_TITLE((
+				"Venezuela. April 2017.\n\n" +
+				"What is happening here?\n\n" +
+				"People are protesting the acute scarcity of " +
+				"food and basic products. They also claim for " +
+				"elections that should have been done last year, " +
+				"but the government denies them because they're " +
+				"too unpopular to win anything by popular, universal vote.\n\n" +
+				"The Bolivarian National Guard surrounds " +
+				"protestors to rob and punch them. They are " + 
+				"then illegally detained.\n\n" + 
+				"You are a congressman, with parliamentary " +
+				"immunity. Protect people from being taken away."
+				)),
+			MOVE_CAMERA_TO_SPRITE_TWEENED(diputado, CENTER, TitleScreen.total_news_time()),
+			DELAY_SECONDS(1),
 			GO_TO_GAME_STATE(CONTROL_AVATAR(diputado, null, null)),
 			START_UPDATE_FUNCTION(move_guardia),
-			DELAY_SECONDS(8),
-			STOP_UPDATE_FUNCTION(move_guardia),
-			GO_TO_GAME_STATE(CUTSCENE),
-			ANNOUNCE_NEWS(PortraitE.PORTRAIT_NR, "Nestor Reverol", "Aqui hay juerza"),
+			DELAY_SECONDS(5),
+			//STOP_UPDATE_FUNCTION(move_guardia),
+			//GO_TO_GAME_STATE(CUTSCENE),
+			ANNOUNCE_NEWS(PortraitE.PORTRAIT_NR, "Nestor Reverol", "We protect the constitutional guarantees. These are terrorists protesting."),
 			DELAY_SECONDS(NewsScreen.total_news_time()),
-			GO_TO_GAME_STATE(CONTROL_AVATAR(diputado, null, null)),
-			START_UPDATE_FUNCTION(move_guardia),
-			DELAY_SECONDS(8),
-			STOP_UPDATE_FUNCTION(move_guardia),
-			ANNOUNCE_NEWS(PortraitE.PORTRAIT_MP, "Miguel Pizarro", "Los muros van a caer"),
+			//GO_TO_GAME_STATE(CONTROL_AVATAR(diputado, null, null)),
+			//START_UPDATE_FUNCTION(move_guardia),
+			DELAY_SECONDS(5),
+			//STOP_UPDATE_FUNCTION(move_guardia),
+			//GO_TO_GAME_STATE(CUTSCENE),
+			ANNOUNCE_NEWS(PortraitE.PORTRAIT_FG, "Freddy Guevara", "I told you that you will not take them away!"),
+			DELAY_SECONDS(NewsScreen.total_news_time()),
+			GO_TO_GAME_STATE(CUTSCENE),
+			CURTAIN_FADE_OUT(0.5),
+			DISPLAY_TVSTATIC(0.75),
+			DELAY_SECONDS(1),
+			ANNOUNCE_TITLE((
+				"There is a lot more happening. But this is only a jam. This is just the beginning.\n\nYou should see more of this on TV. But turns out that the Venezuelan government controls all TV media companies, public or private, so there's a lot of self-censorship.\n\nPlease do not believe what the Venezuelan embassies say, as they spread mostly propaganda and lies."				)),
+			DELAY_SECONDS(TitleScreen.total_news_time()),
+			GO_TO_FLIXEL_STATE(MenuState),
 		].iterator();
 	}
 	
@@ -288,17 +313,23 @@ class Fajardo extends FlxSpriteGroup implements ScenarioInterface
 			var distancias = [];
 			for (m in marcha.iterator())
 			{
-				distancias.push({ dist:FlxMath.distanceBetween(m, un_guardia), spr: m});
-			}
-			var min_distancia = distancias[0];
-			for (dst in distancias)
-			{
-				if (dst.dist < min_distancia.dist)
+				if (m.protesting)
 				{
-					min_distancia = dst;
+					distancias.push({ dist:FlxMath.distanceBetween(m, un_guardia), spr: m});
 				}
 			}
-			un_guardia.state = CHASING(min_distancia.spr, 100);
+			if (distancias.length > 0)
+			{
+				var min_distancia = distancias[0];
+				for (dst in distancias)
+				{
+					if (dst.dist < min_distancia.dist)
+					{
+						min_distancia = dst;
+					}
+				}
+				un_guardia.state = CHASING(min_distancia.spr, 100);
+			}
 		}
 	}
 	

@@ -3,18 +3,17 @@
   <file path="source/CreditsState.hx">
     <t id="GRAPHICS: Ciro Durán">GRAPHICS: Ciro Durán</t><!--line 24-->
     <t id="PROGRAMMING: Ciro Durán">PROGRAMMING: Ciro Durán</t><!--line 21-->
-    <t id="Press space to return to menu">Press space to return to menu</t><!--line 33-->
-    <t id="TITLE ART: Héctor Vargas">TITLE ART: Héctor Vargas</t><!--line 30-->
+    <t id="Press any key to return to menu">Press any key to return to menu</t><!--line 30-->
     <t id="WRITING: César Sánchez">WRITING: César Sánchez</t><!--line 27-->
   </file>
   <file path="source/MenuState.hx">
-    <t id="CAMBIAR A ESPAÑOL">CAMBIAR A ESPAÑOL</t><!--line 171-->
-    <t id="CONTROL: HIDDEN">CONTROL: HIDDEN</t><!--line 165-->
-    <t id="CONTROL: SHOWN">CONTROL: SHOWN</t><!--line 161-->
-    <t id="CREDITS">CREDITS</t><!--line 58-->
-    <t id="SOUND: OFF">SOUND: OFF</t><!--line 153-->
-    <t id="SOUND: ON">SOUND: ON</t><!--line 149-->
-    <t id="START">START</t><!--line 51-->
+    <t id="CAMBIAR A ESPAÑOL">CAMBIAR A ESPAÑOL</t><!--line 159-->
+    <t id="CONTROL: HIDDEN">CONTROL: HIDDEN</t><!--line 153-->
+    <t id="CONTROL: SHOWN">CONTROL: SHOWN</t><!--line 149-->
+    <t id="CREDITS">CREDITS</t><!--line 53-->
+    <t id="SOUND: OFF">SOUND: OFF</t><!--line 141-->
+    <t id="SOUND: ON">SOUND: ON</t><!--line 137-->
+    <t id="START">START</t><!--line 49-->
   </file>
   <file path="source/screen/PauseScreen.hx">
     <t id="CONTROL: HIDDEN">CONTROL: HIDDEN</t><!--line 137-->
@@ -24,8 +23,5 @@
     <t id="RETURN TO MENU">RETURN TO MENU</t><!--line 45-->
     <t id="SOUND: OFF">SOUND: OFF</t><!--line 125-->
     <t id="SOUND: ON">SOUND: ON</t><!--line 121-->
-  </file>
-  <file path="source/screen/TitleScreen.hx">
-    <t id="RETURN TO GAME">RETURN TO GAME</t><!--line 54-->
   </file>
 </strings>

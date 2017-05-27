@@ -21,6 +21,7 @@ import play.enums.PortraitE;
 import screen.CurtainScreen;
 import screen.TVStaticScreen;
 import flixel.MyFlxVirtualPad;
+import screen.TitleScreen;
 
 import play.GameKeyboardInputs;
 import play.GameState;
@@ -40,12 +41,13 @@ class PlayState extends FlxState
 	var scenario : Fajardo;
 	var pause_screen : PauseScreen;
 	var news_screen : NewsScreen;
+	var title_screen : TitleScreen;
 	var static_screen : TVStaticScreen;
 	var curtain_screen : CurtainScreen;
 	var virtual_pad : MyFlxVirtualPad;
 	var gameState : GameState;
 	
-	var stateDebugText : FlxText;
+	//var stateDebugText : FlxText;
 	
 	var inputQueue : Array<GameActionE>;
 	var messageStack : GenericStack<AbstractIterator<GameActionE>>;
@@ -63,20 +65,22 @@ class PlayState extends FlxState
 		scenario = new Fajardo();
 		gameState = scenario.starting_state();
 		news_screen = new NewsScreen();
+		title_screen = new TitleScreen();
 		static_screen = new TVStaticScreen(gameState.tv_static_active);
 		curtain_screen = new CurtainScreen(gameState.curtain_alpha);
 		pause_screen = new PauseScreen(gameState.paused);
 		
-		stateDebugText = new FlxText(5, FlxG.height - 15, FlxG.width - 10, "State:");
-		stateDebugText.scrollFactor.set();
+		//stateDebugText = new FlxText(5, FlxG.height - 15, FlxG.width - 10, "State:");
+		//stateDebugText.scrollFactor.set();
 		
 		add(scenario);
 		add(news_screen);
 		add(static_screen);
 		add(curtain_screen);
 		add(pause_screen);
+		add(title_screen);
 		add(virtual_pad);
-		add(stateDebugText);
+		//add(stateDebugText);
 
 		var cameraBounds = scenario.camera_bounds();
 		
@@ -304,7 +308,11 @@ class PlayState extends FlxState
 			case ANNOUNCE_NEWS(portrait, name, dialogue):
 				move_sprite(scenario.main_character(), NONE);
 				news_screen.display_segment(portrait, name, dialogue);
-				
+			
+			case ANNOUNCE_TITLE(text):
+				move_sprite(scenario.main_character(), NONE);
+				title_screen.display_segment(text);
+			
 			case GO_TO_GAME_STATE(state):
 				dealTransition(gameState.state, state);
 				gameState.state = state;
@@ -388,7 +396,7 @@ class PlayState extends FlxState
 	{
 		gameState.camera_position.x = camera.scroll.x;
 		gameState.camera_position.y = camera.scroll.y;
-		stateDebugText.text = "State: " + Std.string(gameState.state);
+		//stateDebugText.text = "State: " + Std.string(gameState.state);
 	}
 	
 	private function getGameActions() : Array<GameActionE>

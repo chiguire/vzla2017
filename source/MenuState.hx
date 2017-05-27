@@ -1,5 +1,6 @@
 package;
 
+import com.roxstudio.i18n.Global;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
@@ -19,18 +20,19 @@ class MenuState extends FlxState
 
 	var pause_bg : FlxSprite;
 	var return_text : FlxText;
-	var language_text : FlxText;
+	//var language_text : FlxText;
 	var sound_text : FlxText;
 	var control_text : FlxText;
 	var credits_text : FlxText;
+	var order : Array<FlxText>;
 	
 	var selected_cursor : FlxSprite;
 	var selected_item : Int;
 	
-	private static inline var num_items : Int = 5;
-	private static inline var starting_y : Int = 50;
+	private static inline var num_items : Int = 4;
+	//private static inline var starting_y : Int = 50;
 	private static inline var spacing_y : Int = 20;
-	private static function order_item_y(ix:Int) { return starting_y + ix * spacing_y; }
+	//private static function order_item_y(ix:Int) { return starting_y + ix * spacing_y; }
 	
 	var virtual_pad : MyFlxVirtualPad;
 	
@@ -43,14 +45,20 @@ class MenuState extends FlxState
 		FlxG.mouse.visible = false;
 		FlxG.autoPause = false;
 		
-		pause_bg = new FlxSprite(0, 0);
+		pause_bg = new FlxSprite(0, 0, AssetPaths.vzla2017_png__png);
 		//pause_bg.makeGraphic(FlxG.width, FlxG.height, FlxColor.fromRGB(0, 0, 0, 168), false);
 		
-		return_text  = new FlxText(60.5, order_item_y(0), FlxG.width - 60, "START".i18n());
-		language_text = new FlxText(60.5, order_item_y(1), FlxG.width - 60, language_txt());
-		sound_text   = new FlxText(60.5, order_item_y(2), FlxG.width - 60, sound_txt());
-		control_text = new FlxText(60.5, order_item_y(3), FlxG.width - 60, control_txt());
-		credits_text    = new FlxText(60.5, order_item_y(4), FlxG.width - 60, "CREDITS".i18n());
+		return_text  = new FlxText(30.5, FlxG.height - spacing_y * 2, FlxG.width - 60, "START".i18n());
+		return_text.color = FlxColor.BLACK;
+		//language_text = new FlxText(60.5, order_item_y(1), FlxG.width - 60, language_txt());
+		sound_text   = new FlxText(30.5, FlxG.height - spacing_y * 1, FlxG.width - 60, sound_txt());
+		sound_text.color = FlxColor.BLACK;
+		control_text = new FlxText(120.5, FlxG.height - spacing_y * 2, FlxG.width - 60, control_txt());
+		control_text.color = FlxColor.BLACK;
+		credits_text    = new FlxText(120.5, FlxG.height - spacing_y * 1, FlxG.width - 60, "CREDITS".i18n());
+		credits_text.color = FlxColor.BLACK;
+		
+		order = [return_text, sound_text, control_text, credits_text];
 		
 		selected_cursor = new FlxSprite(30, 30);
 		selected_cursor.makeGraphic(12, 12, FlxColor.RED);
@@ -59,7 +67,7 @@ class MenuState extends FlxState
 		
 		add(pause_bg);
 		add(return_text);
-		add(language_text);
+		//add(language_text);
 		add(sound_text);
 		add(control_text);
 		add(credits_text);
@@ -91,7 +99,7 @@ class MenuState extends FlxState
 			execute_action();
 		}
 		
-		selected_cursor.setPosition(30, order_item_y(selected_item));
+		selected_cursor.setPosition(order[selected_item].x - 15, order[selected_item].y);
 		virtual_pad.visible = Reg.virtualpad_visible;
 		virtual_pad.active = Reg.virtualpad_visible;
 	}
@@ -112,18 +120,22 @@ class MenuState extends FlxState
 		{
 			case 0:
 				FlxG.switchState(new PlayState());
-			case 1:
-				//I18n.locale = 
-				language_text.text = language_txt();
+			//case 1:
+				//Global.currentLocale = Reg.changeLocale();
+				//return_text.text = "START".i18n();
+				////language_text.text = language_txt();
+				//control_text.text = control_txt();
+				//sound_text.text = sound_txt();
+				//credits_text.text = "CREDITS".i18n();
 				
-			case 2:
+			case 1:
 				Reg.sound_on = !Reg.sound_on;
 				sound_text.text = sound_txt();
 				
-			case 3:
+			case 2:
 				Reg.virtualpad_visible = !Reg.virtualpad_visible;
 				control_text.text = control_txt();
-			case 4:
+			case 3:
 				FlxG.switchState(new CreditsState());
 			default:
 				throw "Invalid index selected";

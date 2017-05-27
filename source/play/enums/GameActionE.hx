@@ -33,6 +33,7 @@ enum GameActionE
 	
 	DISPLAY_TVSTATIC(time:Float);
 	ANNOUNCE_NEWS(portrait:PortraitE, name:String, dialogue:String);
+	ANNOUNCE_TITLE(text:String);
 	
 	MOVE_SPRITE_DIRECTION(sprite:FlxSprite, direction:DirectionE);
 	MOVE_SPRITE_TO_POS(sprite:FlxSprite, pos:FlxPoint);

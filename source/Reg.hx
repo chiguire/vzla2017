@@ -8,7 +8,11 @@ import flixel.input.keyboard.FlxKey;
  */
 class Reg
 {
-	public static var locale : String = "en";
+	public static function changeLocale() {
+		return Reg.locale = (Reg.locale == "en" || Reg.locale == "default"? "es": "en");
+	}
+	
+	public static var locale (default, null) : String = "en";
 	
 	public static var sound_on : Bool = true;
 	

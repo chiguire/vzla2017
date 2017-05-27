@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<strings>
+  <file path="source/CreditsState.hx">
+    <t id="GRAPHICS: Ciro Durán">GRÁFICOS: Ciro Durán</t><!--line 24-->
+    <t id="PROGRAMMING: Ciro Durán">PROGRAMACIÓN: Ciro Durán</t><!--line 21-->
+    <t id="Press any key to return to menu">Presiona cualquier tecla para volver</t><!--line 30-->
+    <t id="WRITING: César Sánchez">ESCRITURA: César Sánchez</t><!--line 27-->
+  </file>
+  <file path="source/MenuState.hx">
+    <t id="CAMBIAR A ESPAÑOL">CAMBIAR A ESPAÑOL</t><!--line 159-->
+    <t id="CONTROL: HIDDEN">CONTROL: ESCONDIDO</t><!--line 153-->
+    <t id="CONTROL: SHOWN">CONTROL: VISIBLE</t><!--line 149-->
+    <t id="CREDITS">CRÉDITOS</t><!--line 53-->
+    <t id="SOUND: OFF">SONIDO: OFF</t><!--line 141-->
+    <t id="SOUND: ON">SONIDO: ON</t><!--line 137-->
+    <t id="START">COMENZAR</t><!--line 49-->
+  </file>
+  <file path="source/screen/PauseScreen.hx">
+    <t id="CONTROL: HIDDEN">CONTROL: ESCONDIDO</t><!--line 137-->
+    <t id="CONTROL: SHOWN">CONTROL: VISIBLE</t><!--line 133-->
+    <t id="RESTART GAME">REINICIAR JUEGO</t><!--line 42-->
+    <t id="RETURN TO GAME">REGRESAR AL JUEGO</t><!--line 41-->
+    <t id="RETURN TO MENU">REGRESAR AL MENU</t><!--line 45-->
+    <t id="SOUND: OFF">SONIDO: OFF</t><!--line 125-->
+    <t id="SOUND: ON">SONIDO: ON</t><!--line 121-->
+  </file>
+</strings>
